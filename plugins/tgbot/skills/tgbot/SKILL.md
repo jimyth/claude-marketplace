@@ -1,17 +1,15 @@
-# /tgbot - Telegram Bot Generator
+---
+name: tgbot
+description: Generate a complete Telegram Bot project using python-telegram-bot. Use when user wants to create a Telegram bot.
+---
 
-Generate a complete Telegram Bot project using python-telegram-bot.
+# Generate Telegram Bot
 
-## Arguments
+Create a complete Telegram Bot project with python-telegram-bot library.
 
-- `$ARGUMENTS`: Bot name (optional, defaults to "my-tgbot")
+## Usage
 
-## Features
-
-- Python 3.9+ compatible
-- Task management with inline keyboards
-- Real-time status updates
-- Async/await support
+User provides bot name (optional, defaults to "my-tgbot").
 
 ## Steps
 
@@ -130,7 +128,7 @@ class TaskBot:
 
         await update.message.reply_text(
             "📦 *演示任务*\n\n"
-            "这是一个演示任务,点击按钮进行确认或取消。",
+            "这是一个演示任务，点击按钮进行确认或取消。",
             reply_markup=keyboard,
             parse_mode="Markdown",
         )
@@ -233,11 +231,4 @@ echo "   3. export TELEGRAM_CHAT_ID='your_chat_id'"
 echo "   4. cd $BOT_DIR && python3 -m venv venv && source venv/bin/activate"
 echo "   5. pip install -r requirements.txt"
 echo "   6. python3 bot.py"
-```
-
-## Example
-
-```
-/tgbot              # Create bot in ~/workspace/my-tgbot
-/tgbot my-awesome-bot  # Create with custom name
 ```

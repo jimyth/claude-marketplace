@@ -5,20 +5,21 @@
     "email": "jimyth@example.com"
   },
   "metadata": {
-    "description": "A plugin marketplace providing a skill market manager for Claude Code",
-    "version": "1.0.0"
+    "description": "A plugin marketplace with useful tools for Claude Code",
+    "version": "1.0.0",
+    "pluginRoot": "./plugins"
   },
   "plugins": [
     {
-      "name": "marketplace",
-      "source": "./plugins/marketplace",
-      "description": "Skill market manager: search, install, update, and publish skills",
+      "name": "tgbot",
+      "source": "./tgbot",
+      "description": "Generate Telegram Bot projects with python-telegram-bot",
       "version": "1.0.0",
       "author": {
         "name": "Jimyth"
       },
-      "category": "productivity",
-      "keywords": ["marketplace", "skill", "extension", "manage"]
+      "category": "development",
+      "keywords": ["telegram", "bot", "python", "generator"]
     }
   ]
 }

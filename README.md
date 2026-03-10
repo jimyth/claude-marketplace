@@ -1,122 +1,52 @@
-# Jimyth Skills Marketplace
+# Jimyth Skills
 
-A plugin marketplace for Claude Code that provides a skill market manager.
-
-## Architecture
-
-```
-Plugin Marketplace (jimyth/claude-marketplace)
-│
-├── plugins/marketplace/      ← Skill Market Manager Plugin
-│   └── commands/
-│       ├── mp-config
-│       ├── mp-search
-│       ├── mp-install
-│       ├── mp-list
-│       ├── mp-update
-│       └── mp-publish
-│
-└── skills/tgbot/             ← Skills available in the market
-    └── SKILL.md
-```
+A plugin marketplace for Claude Code.
 
 ## Installation
 
-### Step 1: Add the plugin marketplace
+### 1. Add the marketplace
 
 ```bash
 /plugin marketplace add jimyth/claude-marketplace
 ```
 
-### Step 2: Install the skill market manager
+### 2. Install the tgbot plugin
 
 ```bash
-/plugin install marketplace@jimyth-skills
+/plugin install tgbot@jimyth-skills
 ```
 
-### Step 3: Use the skill market manager
+### 3. Use the skill
 
 ```bash
-# Search for skills
-/jimyth-skills:mp-search telegram
-
-# Install a skill
-/jimyth-skills:mp-install tgbot
-
-# List installed skills
-/jimyth-skills:mp-list
-
-# Update skills
-/jimyth-skills:mp-update
+/tgbot:tgbot              # Create bot with default name
+/tgbot:tgbot my-awesome-bot  # Create with custom name
 ```
 
-### Step 4: Use installed skills directly
-
-After installing a skill, use it without namespace prefix:
-
-```bash
-/tgbot my-awesome-bot
-```
-
-## Available Skills
+## Available Plugins
 
 ### tgbot
 
 Generate complete Telegram Bot projects with python-telegram-bot.
 
-```bash
-/jimyth-skills:mp-install tgbot
-/tgbot                    # Create bot in ~/workspace/my-tgbot
-/tgbot my-awesome-bot     # Create with custom name
-```
-
-## Commands Reference
-
-| Command | Description |
-|---------|-------------|
-| `/jimyth-skills:mp-config [--show]` | Show current configuration |
-| `/jimyth-skills:mp-search [keyword]` | Search for skills |
-| `/jimyth-skills:mp-install <id>` | Install a skill |
-| `/jimyth-skills:mp-list` | List installed skills |
-| `/jimyth-skills:mp-update [id]` | Update skills |
-| `/jimyth-skills:mp-publish [path]` | Publish a skill |
+- Python 3.9+ compatible
+- Task management with inline keyboards
+- Real-time status updates
+- Async/await support
 
 ## Project Structure
 
 ```
 claude-marketplace/
 ├── .claude-plugin/
-│   └── marketplace.json     # Plugin marketplace catalog
-├── plugins/
-│   └── marketplace/         # Skill market manager plugin
-│       ├── .claude-plugin/
-│       │   └── plugin.json
-│       └── commands/
-│           ├── mp-config.md
-│           ├── mp-search.md
-│           ├── mp-install.md
-│           ├── mp-list.md
-│           ├── mp-update.md
-│           └── mp-publish.md
-├── skills/                  # Skills in the market
-│   └── tgbot/
-│       ├── manifest.yaml
-│       └── SKILL.md
-├── index.yaml               # Skills index
-└── README.md               # This file
-```
-
-## Development
-
-```bash
-# Clone the repository
-git clone https://github.com/jimyth/claude-marketplace.git
-
-# Test locally
-/plugin marketplace add ./claude-marketplace
-
-# Install the marketplace plugin
-/plugin install marketplace@jimyth-skills
+│   └── marketplace.json
+└── plugins/
+    └── tgbot/
+        ├── .claude-plugin/
+        │   └── plugin.json
+        └── skills/
+            └── tgbot/
+                └── SKILL.md
 ```
 
 ## License
