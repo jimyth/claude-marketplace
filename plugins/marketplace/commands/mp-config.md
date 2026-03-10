@@ -1,120 +1,121 @@
 # /mp-config - Configure Marketplace
 
-Configure your marketplace connection settings.
+Configure the marketplace settings.
 
 ## Arguments
 
-- `--api-key <key>`: Set your API key
+- `--server <url>`: Set custom server URL
+- `--api-key <key>`: Set API key for publishing
 - `--show`: Show current configuration
+- `--reset`: Reset to default configuration
 
-## Steps
+## Execute
 
-### 1. Check arguments
+Run this single command to configure marketplace:
 
 ```bash
-API_KEY=""
-SHOW_CONFIG=false
+CONFIG_FILE="$HOME/.claude/marketplace/config.json"
+ARGS="${ARGUMENTS:-}"
 
-for arg in "$ARGUMENTS"; do
+# Ensure config directory exists
+mkdir -p "$(dirname "$CONFIG_FILE")"
+
+# Parse arguments
+SHOW_CONFIG=false
+RESET_CONFIG=false
+SERVER_URL=""
+API_KEY=""
+
+for arg in $ARGS; do
   case "$arg" in
-    --api-key=*)
-      API_KEY="${arg#*=}"
-      ;;
     --show)
       SHOW_CONFIG=true
       ;;
+    --reset)
+      RESET_CONFIG=true
+      ;;
+    --server=*)
+      SERVER_URL="${arg#*=}"
+      ;;
+    --api-key=*)
+      API_KEY="${arg#*=}"
+      ;;
   esac
 done
-```
 
-### 2. Setup config directory
-
-```bash
-CONFIG_DIR="$HOME/.claude/marketplace"
-CONFIG_FILE="$CONFIG_DIR/config.json"
-
-mkdir -p "$CONFIG_DIR"
-```
-
-### 3. Show current config
-
-```bash
+# Handle --show
 if [ "$SHOW_CONFIG" = true ]; then
   if [ -f "$CONFIG_FILE" ]; then
     echo "📋 Current Configuration:"
     echo ""
-    cat "$CONFIG_FILE" | python3 -c "
-import sys, json
-data = json.load(sys.stdin)
-key = data.get('apiKey', '')
-masked = '****' + key[-4:] if len(key) > 4 else '(not set)'
-print(f'  API Key: {masked}')
-print(f'  Server: {data.get(\"server\", \"https://api.claude-mp.com\")}')
-"
+    cat "$CONFIG_FILE"
   else
-    echo "⚠️  No configuration found. Run: /mp-config --api-key YOUR_KEY"
+    echo "📋 No configuration file found."
+    echo "Using defaults:"
+    echo "  Server: https://raw.githubusercontent.com/jimyth/claude-marketplace/main"
   fi
   exit 0
 fi
-```
 
-### 4. Set API key
-
-```bash
-if [ -n "$API_KEY" ]; then
-  # Validate API key format (should be at least 16 characters)
-  if [ ${#API_KEY} -lt 16 ]; then
-    echo "❌ Invalid API key format. Key should be at least 16 characters."
-    exit 1
-  fi
-
-  # Create or update config
-  if [ -f "$CONFIG_FILE" ]; then
-    # Update existing config
-    python3 << EOF
-import json
-with open("$CONFIG_FILE", "r") as f:
-    config = json.load(f)
-config["apiKey"] = "$API_KEY"
-with open("$CONFIG_FILE", "w") as f:
-    json.dump(config, f, indent=2)
-EOF
-  else
-    # Create new config
-    cat > "$CONFIG_FILE" << EOF
+# Handle --reset
+if [ "$RESET_CONFIG" = true ]; then
+  cat > "$CONFIG_FILE" << 'EOF'
 {
-  "apiKey": "$API_KEY",
-  "server": "https://api.claude-mp.com"
+  "server": "https://raw.githubusercontent.com/jimyth/claude-marketplace/main"
 }
 EOF
-    chmod 600 "$CONFIG_FILE"
-  fi
-
-  echo "✅ API key configured successfully!"
-  echo ""
-  echo "💡 Next steps:"
-  echo "   /mp-search <keyword>  - Search for extensions"
-  echo "   /mp-install <name>    - Install an extension"
+  echo "✅ Configuration reset to defaults"
+  cat "$CONFIG_FILE"
+  exit 0
 fi
-```
 
-### 5. Interactive setup (no arguments)
-
-```bash
-if [ -z "$API_KEY" ] && [ "$SHOW_CONFIG" = false ]; then
-  echo "🔧 Claude Marketplace Configuration"
-  echo ""
-  echo "Usage:"
-  echo "  /mp-config --api-key YOUR_API_KEY   Set API key"
-  echo "  /mp-config --show                   Show current config"
-  echo ""
-  echo "Get your API key at: https://claude-mp.com/api-keys"
+# Read existing config or create new
+if [ -f "$CONFIG_FILE" ]; then
+  CONFIG=$(cat "$CONFIG_FILE")
+else
+  CONFIG='{"server": "https://raw.githubusercontent.com/jimyth/claude-marketplace/main"}'
 fi
+
+# Update config with new values
+export CONFIG_FILE CONFIG SERVER_URL API_KEY
+
+python3 << 'SCRIPT'
+import json
+import os
+
+config_file = os.environ.get('CONFIG_FILE', '')
+config_str = os.environ.get('CONFIG', '{}')
+server_url = os.environ.get('SERVER_URL', '')
+api_key = os.environ.get('API_KEY', '')
+
+try:
+    config = json.loads(config_str)
+
+    if server_url:
+        config['server'] = server_url
+        print(f"✅ Server set to: {server_url}")
+
+    if api_key:
+        config['apiKey'] = api_key
+        print(f"✅ API key configured")
+
+    with open(config_file, 'w') as f:
+        json.dump(config, f, indent=2)
+
+    if not server_url and not api_key:
+        print("📋 Current configuration:")
+        print(json.dumps(config, indent=2))
+
+except Exception as e:
+    print(f"❌ Error: {e}")
+    exit(1)
+SCRIPT
 ```
 
 ## Example
 
 ```
-/mp-config --api-key mp_live_abc123def456
-/mp-config --show
+/jimyth-skills:mp-config --show
+/jimyth-skills:mp-config --reset
+/jimyth-skills:mp-config --api-key your_key_here
 ```

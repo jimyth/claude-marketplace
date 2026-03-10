@@ -1,35 +1,35 @@
-# /mp-list - List Installed Extensions
+# /mp-list - List Installed Skills
 
-List all installed extensions.
+List all skills installed from the marketplace.
 
-## Steps
+## Arguments
 
-### 1. Check cache file
+None
+
+## Execute
+
+Run this single command to list installed skills:
 
 ```bash
-CACHE_FILE="$HOME/.claude/marketplace/cache.json"
+INSTALL_CACHE="$HOME/.claude/marketplace/installed.json"
 
-if [ ! -f "$CACHE_FILE" ]; then
-  echo "📋 No extensions installed yet."
+if [ ! -f "$INSTALL_CACHE" ]; then
+  echo "📋 No skills installed yet."
   echo ""
-  echo "💡 Search for extensions: /mp-search <keyword>"
-  echo "   Install an extension: /mp-install <id>"
+  echo "💡 Search and install:"
+  echo "   /jimyth-skills:mp-search <keyword>"
+  echo "   /jimyth-skills:mp-install <id>"
   exit 0
 fi
-```
 
-### 2. Display installed extensions
-
-```bash
-echo "📋 Installed Extensions:"
+echo "📋 Installed Skills:"
 echo ""
 
-python3 << 'EOF'
+python3 << 'SCRIPT'
 import json
 import os
-from datetime import datetime
 
-cache_file = os.environ.get('CACHE_FILE', os.path.expanduser('~/.claude/marketplace/cache.json'))
+cache_file = os.path.expanduser("~/.claude/marketplace/installed.json")
 
 try:
     with open(cache_file, 'r') as f:
@@ -38,37 +38,27 @@ try:
     installed = cache.get('installed', [])
 
     if not installed:
-        print("No extensions installed.")
+        print("No skills installed.")
     else:
-        for ext in installed:
-            source_tag = f"[{ext.get('source', 'unknown')}]"
-            installed_date = ext.get('installedAt', '')
-            if installed_date:
-                try:
-                    dt = datetime.fromisoformat(installed_date)
-                    installed_date = dt.strftime('%Y-%m-%d')
-                except:
-                    pass
-
-            print(f"  📦 {ext['id']} {source_tag}")
-            print(f"     Version: {ext.get('version', 'unknown')}")
-            print(f"     Installed: {installed_date}")
-            print(f"     Path: {ext.get('path', 'N/A')}")
+        for skill in installed:
+            print(f"  📦 {skill['id']}")
+            print(f"     {skill.get('name', 'Unknown')} v{skill.get('version', '1.0.0')}")
+            print(f"     Installed: {skill.get('installedAt', 'Unknown')}")
             print("")
 
         print("───────────────────────────────────────")
-        print(f"Total: {len(installed)} extension(s)")
+        print(f"Total: {len(installed)} skill(s)")
         print("")
-        print("💡 Update all: /mp-update --all")
-        print("   Remove: /mp-clean <id>")
+        print("💡 Update: /jimyth-skills:mp-update")
 
 except Exception as e:
-    print(f"Error reading cache: {e}")
-EOF
+    print(f"❌ Error: {e}")
+    exit(1)
+SCRIPT
 ```
 
 ## Example
 
 ```
-/mp-list    # List all installed extensions
+/jimyth-skills:mp-list
 ```

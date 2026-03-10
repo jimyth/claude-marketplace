@@ -1,156 +1,137 @@
-# /mp-update - Update Extensions
+# /mp-update - Update Skills
 
-Check for and install updates for extensions.
+Check for and install updates for installed skills.
 
 ## Arguments
 
-- `$ARGUMENTS`: Extension ID (optional, updates all if not specified)
-- `--all`: Update all installed extensions
+- `$ARGUMENTS`: Skill ID (optional, updates all if not specified)
 
-## Steps
+## Execute
 
-### 1. Parse arguments
-
-```bash
-EXT_ID=""
-UPDATE_ALL=false
-
-for arg in $ARGUMENTS; do
-  case "$arg" in
-    --all)
-      UPDATE_ALL=true
-      ;;
-    *)
-      EXT_ID="$arg"
-      ;;
-  esac
-done
-```
-
-### 2. Get configuration
+Run this single command to update skills:
 
 ```bash
-CONFIG_FILE="$HOME/.claude/marketplace/config.json"
-CACHE_FILE="$HOME/.claude/marketplace/cache.json"
+EXT_ID="${ARGUMENTS:-}"
 SERVER="https://raw.githubusercontent.com/jimyth/claude-marketplace/main"
+INDEX_URL="$SERVER/index.yaml"
+CACHE_FILE="$HOME/.claude/marketplace/index-cache.yaml"
+INSTALL_CACHE="$HOME/.claude/marketplace/installed.json"
+COMMANDS_DIR="$HOME/.claude/commands"
 
-if [ -f "$CONFIG_FILE" ]; then
-  SERVER=$(python3 -c "import json; print(json.load(open('$CONFIG_FILE')).get('server', '$SERVER'))")
-fi
-```
-
-### 3. Get installed extensions
-
-```bash
-if [ ! -f "$CACHE_FILE" ]; then
-  echo "📋 No extensions installed."
+# Check if any skills installed
+if [ ! -f "$INSTALL_CACHE" ]; then
+  echo "📋 No skills installed yet."
+  echo ""
+  echo "💡 Search and install:"
+  echo "   /jimyth-skills:mp-search <keyword>"
+  echo "   /jimyth-skills:mp-install <id>"
   exit 0
 fi
 
-INSTALLED=$(python3 -c "
-import json
-with open('$CACHE_FILE') as f:
-    cache = json.load(f)
-for ext in cache.get('installed', []):
-    print(f\"{ext['id']}|{ext.get('version', '0.0.0')}\")
-")
+# Force refresh index
+echo "🔄 Fetching latest index..."
+mkdir -p "$(dirname "$CACHE_FILE")"
+curl -sL "$INDEX_URL" -o "$CACHE_FILE" || {
+  echo "❌ Failed to fetch index"
+  exit 1
+}
 
-if [ -z "$INSTALLED" ]; then
-  echo "📋 No extensions installed."
-  exit 0
-fi
-```
-
-### 4. Check for updates
-
-```bash
 echo "🔍 Checking for updates..."
 echo ""
 
-UPDATES_AVAILABLE=()
-
-while IFS='|' read -r ID LOCAL_VERSION; do
-  # Skip if specific extension requested and not this one
-  if [ -n "$EXT_ID" ] && [ "$ID" != "$EXT_ID" ]; then
-    continue
-  fi
-
-  # Get remote version
-  REMOTE_INFO=$(curl -s "$SERVER/extensions/$ID" 2>/dev/null)
-  REMOTE_VERSION=$(echo "$REMOTE_INFO" | python3 -c "import sys,json; print(json.load(sys.stdin).get('version',''))" 2>/dev/null)
-
-  if [ -n "$REMOTE_VERSION" ] && [ "$REMOTE_VERSION" != "$LOCAL_VERSION" ]; then
-    UPDATES_AVAILABLE+=("$ID|$LOCAL_VERSION|$REMOTE_VERSION")
-  fi
-done <<< "$INSTALLED"
-```
-
-### 5. Display and confirm updates
-
-```bash
-if [ ${#UPDATES_AVAILABLE[@]} -eq 0 ]; then
-  echo "✅ All extensions are up to date!"
-  exit 0
-fi
-
-echo "📦 Updates available:"
-echo ""
-
-for update in "${UPDATES_AVAILABLE[@]}"; do
-  IFS='|' read -r ID LOCAL REMOTE <<< "$update"
-  echo "  $ID: $LOCAL → $REMOTE"
-done
-
-echo ""
-read -p "Update ${#UPDATES_AVAILABLE[@]} extension(s)? (y/N): " CONFIRM
-
-if [ "$CONFIRM" != "y" ] && [ "$CONFIRM" != "Y" ]; then
-  echo "Cancelled."
-  exit 0
-fi
-```
-
-### 6. Install updates
-
-```bash
-for update in "${UPDATES_AVAILABLE[@]}"; do
-  IFS='|' read -r ID LOCAL REMOTE <<< "$update"
-  echo ""
-  echo "📥 Updating $ID..."
-
-  # Reinstall extension
-  rm -rf "$HOME/.claude/marketplace/extensions/$ID"
-
-  TEMP_ZIP="/tmp/$ID.zip"
-  curl -s -o "$TEMP_ZIP" "$SERVER/extensions/$ID/download"
-
-  mkdir -p "$HOME/.claude/marketplace/extensions/$ID"
-  cd "$HOME/.claude/marketplace/extensions/$ID"
-  unzip -q "$TEMP_ZIP"
-  rm "$TEMP_ZIP"
-
-  # Update cache
-  python3 -c "
+python3 << 'SCRIPT'
+import yaml
 import json
-with open('$CACHE_FILE', 'r') as f:
-    cache = json.load(f)
-for ext in cache['installed']:
-    if ext['id'] == '$ID':
-        ext['version'] = '$REMOTE'
-with open('$CACHE_FILE', 'w') as f:
-    json.dump(cache, f, indent=2)
-"
+import os
+import urllib.request
 
-  echo "  ✅ Updated to v$REMOTE"
-done
+ext_id = os.environ.get('EXT_ID', '')
+cache_file = os.environ.expanduser("~/.claude/marketplace/index-cache.yaml")
+install_cache_file = os.path.expanduser("~/.claude/marketplace/installed.json")
+commands_dir = os.environ.expanduser("~/.claude/commands")
+server = os.environ.get('SERVER', '')
 
-echo ""
-echo "✅ All updates installed!"
+try:
+    # Load index
+    with open(cache_file, 'r') as f:
+        index = yaml.safe_load(f)
+
+    # Load installed skills
+    with open(install_cache_file, 'r') as f:
+        installed = json.load(f).get('installed', [])
+
+    # Build skill lookup
+    skills_by_id = {s['id']: s for s in index.get('skills', [])}
+
+    updates = []
+    for skill in installed:
+        sid = skill['id']
+        if ext_id and sid != ext_id:
+            continue
+
+        if sid in skills_by_id:
+            remote = skills_by_id[sid]
+            local_version = skill.get('version', '0.0.0')
+            remote_version = remote.get('version', '1.0.0')
+
+            if remote_version != local_version:
+                updates.append({
+                    'id': sid,
+                    'name': remote.get('name', sid),
+                    'local': local_version,
+                    'remote': remote_version,
+                    'path': remote['path']
+                })
+
+    if not updates:
+        print("✅ All skills are up to date!")
+        exit(0)
+
+    print(f"📦 Updates available: {len(updates)}")
+    print("")
+
+    for u in updates:
+        print(f"  {u['id']}: {u['local']} → {u['remote']}")
+
+    print("")
+    print("Updating...")
+
+    # Perform updates
+    for u in updates:
+        skill_md_url = f"{server}/{u['path']}/SKILL.md"
+        dest_file = os.path.join(commands_dir, f"{u['id']}.md")
+
+        print(f"\n  📥 {u['id']}...")
+
+        try:
+            urllib.request.urlretrieve(skill_md_url, dest_file)
+            print(f"     ✅ Updated to v{u['remote']}")
+
+            # Update install cache
+            for skill in installed:
+                if skill['id'] == u['id']:
+                    skill['version'] = u['remote']
+                    break
+
+        except Exception as e:
+            print(f"     ❌ Failed: {e}")
+
+    # Save updated cache
+    with open(install_cache_file, 'w') as f:
+        json.dump({'installed': installed}, f, indent=2)
+
+    print("")
+    print("✅ Update complete!")
+
+except Exception as e:
+    print(f"❌ Error: {e}")
+    exit(1)
+SCRIPT
 ```
 
 ## Example
 
 ```
-/mp-update           # Check and update all
-/mp-update tgbot     # Update specific extension
+/jimyth-skills:mp-update           # Update all
+/jimyth-skills:mp-update tgbot     # Update specific skill
 ```
