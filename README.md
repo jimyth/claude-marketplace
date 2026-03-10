@@ -1,11 +1,11 @@
-# Claude Marketplace
+# Jimyth Skills Marketplace
 
 A plugin marketplace for Claude Code that provides a skill market manager.
 
 ## Architecture
 
 ```
-Claude Code Plugin Marketplace (jimyth/claude-marketplace)
+Plugin Marketplace (jimyth/claude-marketplace)
 │
 ├── plugins/
 │   └── marketplace/          # Skill Market Manager Plugin
@@ -32,23 +32,23 @@ Claude Code Plugin Marketplace (jimyth/claude-marketplace)
 ### Step 2: Install the skill market manager
 
 ```bash
-/plugin install marketplace@claude-marketplace
+/plugin install marketplace@jimyth-skills
 ```
 
 ### Step 3: Use the skill market manager
 
 ```bash
 # Search for skills
-/marketplace:mp-search telegram
+/jimyth-skills:mp-search telegram
 
 # Install a skill
-/marketplace:mp-install tgbot
+/jimyth-skills:mp-install tgbot
 
 # List installed skills
-/marketplace:mp-list
+/jimyth-skills:mp-list
 
 # Update skills
-/marketplace:mp-update
+/jimyth-skills:mp-update
 ```
 
 ### Step 4: Use installed skills directly
@@ -66,7 +66,7 @@ After installing a skill, use it without namespace prefix:
 Generate complete Telegram Bot projects with python-telegram-bot.
 
 ```bash
-/marketplace:mp-install tgbot
+/jimyth-skills:mp-install tgbot
 /tgbot                    # Create bot in ~/workspace/my-tgbot
 /tgbot my-awesome-bot     # Create with custom name
 ```
@@ -75,12 +75,12 @@ Generate complete Telegram Bot projects with python-telegram-bot.
 
 | Command | Description |
 |---------|-------------|
-| `/marketplace:mp-config` | Configure marketplace API key and settings |
-| `/marketplace:mp-search [keyword]` | Search for skills |
-| `/marketplace:mp-install <id>` | Install a skill |
-| `/marketplace:mp-list` | List installed skills |
-| `/marketplace:mp-update [id]` | Update skills |
-| `/marketplace:mp-publish [path]` | Publish a skill |
+| `/jimyth-skills:mp-config` | Configure marketplace API key and settings |
+| `/jimyth-skills:mp-search [keyword]` | Search for skills |
+| `/jimyth-skills:mp-install <id>` | Install a skill |
+| `/jimyth-skills:mp-list` | List installed skills |
+| `/jimyth-skills:mp-update [id]` | Update skills |
+| `/jimyth-skills:mp-publish [path]` | Publish a skill |
 
 ## Project Structure
 
@@ -117,7 +117,7 @@ git clone https://github.com/jimyth/claude-marketplace.git
 /plugin marketplace add ./claude-marketplace
 
 # Install the marketplace plugin
-/plugin install marketplace@claude-marketplace
+/plugin install marketplace@jimyth-skills
 ```
 
 ## License
