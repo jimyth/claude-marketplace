@@ -46,11 +46,13 @@ python3 << SCRIPT
 import yaml
 import os
 import urllib.request
+import json
+from datetime import datetime
 
-cache_file = os.path.expanduser("~/.claude/marketplace/index-cache.yaml")
-server = os.environ.get('SERVER', '')
-ext_id = os.environ.get('EXT_ID', '')
-commands_dir = os.environ.get('COMMANDS_DIR', '')
+cache_file = "$CACHE_FILE"
+server = "$SERVER"
+ext_id = "$EXT_ID"
+commands_dir = "$COMMANDS_DIR"
 
 try:
     with open(cache_file, 'r') as f:
@@ -86,9 +88,6 @@ try:
         exit(1)
 
     # Update installation cache
-    import json
-    from datetime import datetime
-
     install_cache_file = os.path.expanduser("~/.claude/marketplace/installed.json")
     install_cache = {"installed": []}
 
