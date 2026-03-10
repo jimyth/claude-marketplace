@@ -1,7 +1,0 @@
-id: mp-update
-name: Marketplace Update
-version: 1.0.0
-type: skill
-author: system
-description: Check for and install extension updates
-tags: [marketplace, update, upgrade]

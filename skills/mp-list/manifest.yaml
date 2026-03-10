@@ -1,7 +1,0 @@
-id: mp-list
-name: Marketplace List
-version: 1.0.0
-type: skill
-author: system
-description: List installed extensions
-tags: [marketplace, list, installed]

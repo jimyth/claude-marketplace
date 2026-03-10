@@ -1,7 +1,0 @@
-id: mp-config
-name: Marketplace Config
-version: 1.0.0
-type: skill
-author: system
-description: Configure marketplace API key and settings
-tags: [marketplace, config, setup]

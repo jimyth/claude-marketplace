@@ -1,7 +1,0 @@
-id: mp-install
-name: Marketplace Install
-version: 1.0.0
-type: skill
-author: system
-description: Install extensions from the marketplace
-tags: [marketplace, install, download]
