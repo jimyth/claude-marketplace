@@ -5,26 +5,13 @@ Install an extension from the marketplace.
 ## Arguments
 
 - `$ARGUMENTS`: Extension ID to install
-- `--source=<source>`: Force specific source (personal, public)
 
 ## Steps
 
 ### 1. Parse arguments
 
 ```bash
-EXT_ID=""
-FORCE_SOURCE=""
-
-for arg in $ARGUMENTS; do
-  case "$arg" in
-    --source=*)
-      FORCE_SOURCE="${arg#*=}"
-      ;;
-    *)
-      EXT_ID="$arg"
-      ;;
-  esac
-done
+EXT_ID="$ARGUMENTS"
 
 if [ -z "$EXT_ID" ]; then
   echo "❌ Please specify an extension ID"
@@ -40,11 +27,9 @@ fi
 ```bash
 CONFIG_FILE="$HOME/.claude/marketplace/config.json"
 SERVER="https://raw.githubusercontent.com/jimyth/claude-marketplace/main"
-API_KEY=""
 
 if [ -f "$CONFIG_FILE" ]; then
   SERVER=$(python3 -c "import json; print(json.load(open('$CONFIG_FILE')).get('server', '$SERVER'))")
-  API_KEY=$(python3 -c "import json; print(json.load(open('$CONFIG_FILE')).get('apiKey', ''))")
 fi
 ```
 
@@ -56,103 +41,130 @@ CACHE_FILE="$HOME/.claude/marketplace/cache.json"
 
 if [ -d "$INSTALL_DIR" ]; then
   echo "⚠️  Extension '$EXT_ID' is already installed."
-  echo ""
-  read -p "Reinstall? (y/N): " CONFIRM
-  if [ "$CONFIRM" != "y" ] && [ "$CONFIRM" != "Y" ]; then
-    echo "Cancelled."
-    exit 0
-  fi
-  rm -rf "$INSTALL_DIR"
+  echo "   Use /mp-update $EXT_ID to update"
+  exit 0
 fi
 ```
 
-### 4. Download extension
+### 4. Get extension info from index
 
 ```bash
-echo "📥 Downloading: $EXT_ID"
+echo "📥 Installing: $EXT_ID"
 
-# Build URL
-URL="$SERVER/extensions/$EXT_ID/download"
-if [ -n "$FORCE_SOURCE" ]; then
-  URL="$URL?source=$FORCE_SOURCE"
+INDEX_CACHE="$HOME/.claude/marketplace/index-cache.yaml"
+if [ ! -f "$INDEX_CACHE" ]; then
+  echo "🔄 Fetching index first..."
+  curl -sL "$SERVER/index.yaml" -o "$INDEX_CACHE"
 fi
 
-# Download ZIP
-TEMP_ZIP="/tmp/$EXT_ID.zip"
-HTTP_CODE=$(curl -s -w "%{http_code}" -o "$TEMP_ZIP" "$URL")
+EXT_INFO=$(python3 << EOF
+import yaml
+import json
 
-if [ "$HTTP_CODE" != "200" ]; then
-  echo "❌ Failed to download extension (HTTP $HTTP_CODE)"
-  rm -f "$TEMP_ZIP"
+with open("$INDEX_CACHE", 'r') as f:
+    index = yaml.safe_load(f)
+
+for skill in index.get('skills', []):
+    if skill['id'] == '$EXT_ID':
+        print(json.dumps(skill))
+        break
+else:
+    print("null")
+EOF
+)
+
+if [ "$EXT_INFO" = "null" ]; then
+  echo "❌ Extension not found: $EXT_ID"
   exit 1
 fi
 ```
 
-### 5. Install extension
+### 5. Download files
 
 ```bash
-echo "📦 Installing..."
+echo "📦 Downloading files..."
 
 mkdir -p "$INSTALL_DIR"
-cd "$INSTALL_DIR"
-unzip -q "$TEMP_ZIP"
-rm "$TEMP_ZIP"
 
-# Link commands to ~/.claude/commands/
-COMMANDS_DIR="$HOME/.claude/commands"
-mkdir -p "$COMMANDS_DIR"
+# Download each file
+python3 << EOF
+import json
+import os
+import urllib.request
 
-# Find and link command files
-find . -name "*.md" -type f | while read cmd_file; do
-  CMD_NAME=$(basename "$cmd_file" .md)
-  ln -sf "$INSTALL_DIR/$cmd_file" "$COMMANDS_DIR/$CMD_NAME.md"
-  echo "  ✓ Linked: /$CMD_NAME"
-done
+ext_info = $EXT_INFO
+server = "$SERVER"
+install_dir = "$INSTALL_DIR"
+
+skill_path = ext_info['path']
+files = ext_info.get('files', ['SKILL.md'])
+
+for filename in files:
+    url = f"{server}/{skill_path}/{filename}"
+    filepath = os.path.join(install_dir, filename)
+
+    print(f"  ↓ {filename}")
+    try:
+        urllib.request.urlretrieve(url, filepath)
+    except Exception as e:
+        print(f"    Error: {e}")
+EOF
+
+echo "✅ Files downloaded"
 ```
 
 ### 6. Update cache
 
 ```bash
+mkdir -p "$(dirname "$CACHE_FILE")"
+
 python3 << EOF
 import json
 import os
 from datetime import datetime
 
 cache_file = "$CACHE_FILE"
-os.makedirs(os.path.dirname(cache_file), exist_ok=True)
+ext_id = "$EXT_ID"
+install_dir = "$INSTALL_DIR"
 
-# Load existing cache
+# Read manifest
+manifest = {}
+manifest_path = os.path.join(install_dir, "manifest.yaml")
+if os.path.exists(manifest_path):
+    import yaml
+    with open(manifest_path, 'r') as f:
+        manifest = yaml.safe_load(f)
+
+# Load or create cache
+cache = {"installed": []}
 if os.path.exists(cache_file):
     with open(cache_file, 'r') as f:
         cache = json.load(f)
-else:
-    cache = {"installed": []}
 
-# Add/update extension
-installed = [e for e in cache["installed"] if e["id"] != "$EXT_ID"]
-installed.append({
-    "id": "$EXT_ID",
-    "version": "1.0.0",
+# Add extension
+cache['installed'].append({
+    "id": ext_id,
+    "version": manifest.get('version', '1.0.0'),
     "source": "public",
-    "installedAt": datetime.now().isoformat(),
-    "path": "$INSTALL_DIR"
+    "installedAt": datetime.now().isoformat()[:10],
+    "path": install_dir
 })
-cache["installed"] = installed
 
+# Save cache
 with open(cache_file, 'w') as f:
     json.dump(cache, f, indent=2)
 EOF
 
 echo ""
-echo "✅ Extension installed successfully!"
-echo "   Location: $INSTALL_DIR"
+echo "✅ Installation complete!"
+echo "📁 Installed to: $INSTALL_DIR"
 echo ""
-echo "💡 Try: /$EXT_ID"
+echo "💡 Use: /$EXT_ID"
 ```
 
 ## Example
 
 ```
-/mp-install tgbot              # Install from any source
-/mp-install my-skill --source=personal  # Install from personal
+/mp-install tgbot      # Install Telegram Bot Generator
+/mp-install mp-search  # Install another skill
 ```
