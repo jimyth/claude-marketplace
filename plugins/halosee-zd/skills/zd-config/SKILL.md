@@ -11,8 +11,8 @@ argument-hint: [--url|--account|--password|--cycle|--show|--test]
 ## 脚本路径
 
 ```bash
-# 动态查找插件目录（按优先级：项目级 > 用户级）
-ZD_SCRIPT="$(find . -path '*/.claude/plugins/halosee-zd/scripts/zentao-api.sh' 2>/dev/null | head -1)"
+# 动态查找插件脚本（按优先级：缓存目录 > 用户级）
+ZD_SCRIPT="$(find ~/.claude/plugins/cache -path '*/halosee-zd/*/scripts/zentao-api.sh' 2>/dev/null | head -1)"
 [ -z "$ZD_SCRIPT" ] && ZD_SCRIPT="$HOME/.claude/plugins/halosee-zd/scripts/zentao-api.sh"
 ```
 
