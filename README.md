@@ -7,18 +7,17 @@ A plugin marketplace for Claude Code that provides a skill market manager.
 ```
 Plugin Marketplace (jimyth/claude-marketplace)
 │
-├── plugins/
-│   └── marketplace/          # Skill Market Manager Plugin
-│       └── commands/
-│           ├── mp-config     # Configure API key
-│           ├── mp-search     # Search skills
-│           ├── mp-install    # Install skills
-│           ├── mp-list       # List installed
-│           ├── mp-update     # Update skills
-│           └── mp-publish    # Publish skills
+├── plugins/marketplace/      ← Skill Market Manager Plugin
+│   └── commands/
+│       ├── mp-config
+│       ├── mp-search
+│       ├── mp-install
+│       ├── mp-list
+│       ├── mp-update
+│       └── mp-publish
 │
-└── skills/                   # Skills available in the market
-    └── tgbot/                # Telegram Bot Generator
+└── skills/tgbot/             ← Skills available in the market
+    └── SKILL.md
 ```
 
 ## Installation
@@ -75,7 +74,7 @@ Generate complete Telegram Bot projects with python-telegram-bot.
 
 | Command | Description |
 |---------|-------------|
-| `/jimyth-skills:mp-config` | Configure marketplace API key and settings |
+| `/jimyth-skills:mp-config [--show]` | Show current configuration |
 | `/jimyth-skills:mp-search [keyword]` | Search for skills |
 | `/jimyth-skills:mp-install <id>` | Install a skill |
 | `/jimyth-skills:mp-list` | List installed skills |
@@ -104,7 +103,7 @@ claude-marketplace/
 │       ├── manifest.yaml
 │       └── SKILL.md
 ├── index.yaml               # Skills index
-└── install.sh               # Legacy install script
+└── README.md               # This file
 ```
 
 ## Development
