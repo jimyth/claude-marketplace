@@ -20,6 +20,17 @@
       },
       "category": "development",
       "keywords": ["telegram", "bot", "python", "generator"]
+    },
+    {
+      "name": "halosee-zd",
+      "source": "./halosee-zd",
+      "description": "禅道任务管理插件 - 创建、查看、完成禅道任务并统计工时",
+      "version": "1.0.0",
+      "author": {
+        "name": "Jimyth"
+      },
+      "category": "productivity",
+      "keywords": ["zentao", "禅道", "task", "工时", "项目管理"]
     }
   ]
 }

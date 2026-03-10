@@ -1,0 +1,224 @@
+# SKILL.md Template
+
+This template shows the structure for a Claude Code skill's `SKILL.md` file.
+
+## Location
+
+```
+plugins/<plugin-name>/skills/<skill-name>/SKILL.md
+```
+
+or for project-level skills:
+
+```
+.claude/skills/<skill-name>/SKILL.md
+```
+
+## Complete Template
+
+```markdown
+---
+name: skill-name
+description: What this skill does and when Claude should use it. Be specific so Claude knows when to invoke this skill.
+argument-hint: [optional] [arguments]
+disable-model-invocation: false
+user-invocable: true
+allowed-tools: Read, Write, Edit, Glob, Grep, Bash
+context: fork
+agent: Explore
+---
+
+# Skill Title
+
+Brief introduction to what this skill does.
+
+## Usage
+
+Describe how to use this skill:
+
+```
+/skill-name <required-arg> [optional-arg]
+```
+
+- `<required-arg>`: Description of required argument
+- `[optional-arg]`: Description of optional argument
+
+## Overview
+
+Detailed explanation of the skill's purpose and behavior.
+
+## Steps
+
+### 1. First Step
+
+Instructions for the first step.
+
+```bash
+# Example code if needed
+echo "Step 1"
+```
+
+### 2. Second Step
+
+Instructions for the second step.
+
+### 3. Third Step
+
+Instructions for the third step.
+
+## Script Path (Plugins with scripts)
+
+For plugins that include executable scripts, use **dynamic path resolution** instead of hardcoded paths. This ensures the plugin works correctly regardless of installation scope (project-level or user-level).
+
+**Pattern:**
+
+```bash
+# Dynamic plugin path resolution (project-level > user-level)
+SCRIPT_PATH="$(find . -path '*/.claude/plugins/<plugin-name>/scripts/main.sh' 2>/dev/null | head -1)"
+[ -z "$SCRIPT_PATH" ] && SCRIPT_PATH="$HOME/.claude/plugins/<plugin-name>/scripts/main.sh"
+```
+
+**Usage:**
+
+```bash
+bash "$SCRIPT_PATH" --option value
+```
+
+**Why:**
+- Plugins can be installed at project scope (`./.claude/plugins/`) or user scope (`~/.claude/plugins/`)
+- Hardcoded paths break when installed at a different scope
+- The fallback ensures the script is found in either location
+
+## Examples
+
+### Example 1: Basic Usage
+
+```
+/skill-name my-project
+```
+
+Expected output or behavior.
+
+### Example 2: With Optional Arguments
+
+```
+/skill-name my-project --verbose
+```
+
+Expected output or behavior.
+
+## Notes
+
+- Important note 1
+- Important note 2
+
+## Related Resources
+
+- Link to related documentation
+- Link to related skills
+```
+
+## Frontmatter Reference
+
+| Field | Required | Default | Description |
+|-------|----------|---------|-------------|
+| `name` | No | Directory name | Display name. Becomes `/slash-command`. Lowercase, numbers, hyphens only. Max 64 chars. |
+| `description` | Recommended | First paragraph | What the skill does. Claude uses this to decide when to apply it. |
+| `argument-hint` | No | - | Hint shown during autocomplete. E.g., `[filename]` or `[repo] [branch]` |
+| `disable-model-invocation` | No | `false` | Set `true` to prevent Claude from auto-triggering. Use for side-effect operations. |
+| `user-invocable` | No | `true` | Set `false` to hide from `/` menu. Use for background knowledge. |
+| `allowed-tools` | No | All tools | Tools Claude can use without permission. E.g., `Read, Write, Bash(gh *)` |
+| `model` | No | Default | Model to use when skill is active. |
+| `context` | No | - | Set `fork` to run in isolated subagent context. |
+| `agent` | No | `general-purpose` | Which subagent type when `context: fork`. Options: `Explore`, `Plan`, `general-purpose`. |
+| `hooks` | No | - | Hooks scoped to skill lifecycle. |
+
+## Variable Substitutions
+
+Available in skill content:
+
+| Variable | Description |
+|----------|-------------|
+| `$ARGUMENTS` | All arguments passed to the skill |
+| `$0`, `$1`, `$2` | Individual arguments by position (0-indexed) |
+| `$ARGUMENTS[0]` | Same as `$0` |
+| `${CLAUDE_SESSION_ID}` | Current session ID |
+| `${CLAUDE_SKILL_DIR}` | Directory containing SKILL.md |
+
+## Dynamic Content
+
+Use `!`command`` syntax to inject command output:
+
+```markdown
+## Current Branch
+
+!`git branch --show-current`
+```
+
+## Examples
+
+### Simple Command Skill
+
+```markdown
+---
+name: hello
+description: Say hello to someone
+argument-hint: [name]
+disable-model-invocation: true
+---
+
+Say hello to $ARGUMENTS!
+
+If no name provided, say hello to the world.
+```
+
+### File Generator Skill
+
+```markdown
+---
+name: gen-component
+description: Generate a React component
+argument-hint: <component-name>
+disable-model-invocation: true
+allowed-tools: Write, Read
+---
+
+Generate a React component named $0.
+
+### Steps
+1. Create component directory: `src/components/$0/`
+2. Create `$0.tsx` with React component
+3. Create `$0.test.tsx` with tests
+4. Create `index.ts` for exports
+```
+
+### Research Skill (Forked)
+
+```markdown
+---
+name: research
+description: Research a topic in the codebase
+context: fork
+agent: Explore
+---
+
+Research $ARGUMENTS thoroughly:
+
+1. Use Glob to find relevant files
+2. Use Grep to search for keywords
+3. Read and analyze the code
+4. Summarize findings with file references
+```
+
+## Best Practices
+
+1. **Clear Description**: Help Claude understand when to use the skill
+2. **Step-by-Step**: Break complex tasks into numbered steps
+3. **Examples**: Show usage examples
+4. **Keep It Focused**: Each skill should do one thing well
+5. **Use Arguments**: Make skills reusable with `$ARGUMENTS`
+6. **Supporting Files**: For complex skills, use separate files:
+   - `template.md` - Output templates
+   - `examples/` - Example files
+   - `scripts/` - Utility scripts
+7. **Dynamic Script Paths**: For plugins with executable scripts, use dynamic path resolution instead of hardcoded paths (see section above)
