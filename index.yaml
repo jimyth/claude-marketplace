@@ -1,0 +1,102 @@
+version: "1.0"
+owner: jimyth
+updated: "2024-01-15"
+skills:
+  - id: mp-config
+    name: Marketplace Config
+    version: 1.0.0
+    description: Configure marketplace API key and settings
+    author: system
+    path: skills/mp-config
+    files:
+      - manifest.yaml
+      - SKILL.md
+    tags:
+      - marketplace
+      - config
+      - setup
+
+  - id: mp-search
+    name: Marketplace Search
+    version: 1.0.0
+    description: Search for extensions in the marketplace
+    author: system
+    path: skills/mp-search
+    files:
+      - manifest.yaml
+      - SKILL.md
+    tags:
+      - marketplace
+      - search
+      - find
+
+  - id: mp-install
+    name: Marketplace Install
+    version: 1.0.0
+    description: Install extensions from the marketplace
+    author: system
+    path: skills/mp-install
+    files:
+      - manifest.yaml
+      - SKILL.md
+    tags:
+      - marketplace
+      - install
+      - download
+
+  - id: mp-list
+    name: Marketplace List
+    version: 1.0.0
+    description: List installed extensions
+    author: system
+    path: skills/mp-list
+    files:
+      - manifest.yaml
+      - SKILL.md
+    tags:
+      - marketplace
+      - list
+      - installed
+
+  - id: mp-update
+    name: Marketplace Update
+    version: 1.0.0
+    description: Check for and install extension updates
+    author: system
+    path: skills/mp-update
+    files:
+      - manifest.yaml
+      - SKILL.md
+    tags:
+      - marketplace
+      - update
+      - upgrade
+
+  - id: mp-publish
+    name: Marketplace Publish
+    version: 1.0.0
+    description: Publish extensions to the marketplace
+    author: system
+    path: skills/mp-publish
+    files:
+      - manifest.yaml
+      - SKILL.md
+    tags:
+      - marketplace
+      - publish
+      - share
+
+  - id: tgbot
+    name: Telegram Bot Generator
+    version: 1.0.0
+    description: Generate a complete Telegram Bot project with python-telegram-bot
+    author: jimyth
+    path: skills/tgbot
+    files:
+      - manifest.yaml
+      - SKILL.md
+    tags:
+      - telegram
+      - bot
+      - python
+      - automation

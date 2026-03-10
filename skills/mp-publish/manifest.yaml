@@ -1,0 +1,7 @@
+id: mp-publish
+name: Marketplace Publish
+version: 1.0.0
+type: skill
+author: system
+description: Publish extensions to the marketplace
+tags: [marketplace, publish, share]

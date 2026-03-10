@@ -1,0 +1,7 @@
+id: mp-search
+name: Marketplace Search
+version: 1.0.0
+type: skill
+author: system
+description: Search for extensions in the marketplace
+tags: [marketplace, search, find]
