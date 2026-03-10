@@ -1,0 +1,11 @@
+{
+  "name": "marketplace",
+  "version": "1.0.0",
+  "description": "Marketplace management tools: search, install, update, and publish extensions",
+  "author": {
+    "name": "Jimyth"
+  },
+  "license": "MIT",
+  "keywords": ["marketplace", "plugin", "extension", "manage"],
+  "category": "productivity"
+}
