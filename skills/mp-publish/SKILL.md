@@ -152,7 +152,7 @@ if [ -z "$API_KEY" ]; then
   exit 1
 fi
 
-SERVER=$(python3 -c "import json; print(json.load(open('$CONFIG_FILE')).get('server', 'https://api.claude-mp.com'))")
+SERVER=$(python3 -c "import json; print(json.load(open('$CONFIG_FILE')).get('server', 'https://raw.githubusercontent.com/jimyth/claude-marketplace/main'))")
 ```
 
 ### 6. Package and upload

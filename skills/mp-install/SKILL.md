@@ -39,7 +39,7 @@ fi
 
 ```bash
 CONFIG_FILE="$HOME/.claude/marketplace/config.json"
-SERVER="https://api.claude-mp.com"
+SERVER="https://raw.githubusercontent.com/jimyth/claude-marketplace/main"
 API_KEY=""
 
 if [ -f "$CONFIG_FILE" ]; then

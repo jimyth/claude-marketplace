@@ -33,7 +33,7 @@ KEYWORDS=$(echo "$KEYWORDS" | xargs)  # Trim whitespace
 
 ```bash
 CONFIG_FILE="$HOME/.claude/marketplace/config.json"
-SERVER="https://api.claude-mp.com"
+SERVER="https://raw.githubusercontent.com/jimyth/claude-marketplace/main"
 
 if [ -f "$CONFIG_FILE" ]; then
   SERVER=$(python3 -c "import json; print(json.load(open('$CONFIG_FILE')).get('server', '$SERVER'))")

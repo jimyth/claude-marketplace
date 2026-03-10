@@ -32,7 +32,7 @@ done
 ```bash
 CONFIG_FILE="$HOME/.claude/marketplace/config.json"
 CACHE_FILE="$HOME/.claude/marketplace/cache.json"
-SERVER="https://api.claude-mp.com"
+SERVER="https://raw.githubusercontent.com/jimyth/claude-marketplace/main"
 
 if [ -f "$CONFIG_FILE" ]; then
   SERVER=$(python3 -c "import json; print(json.load(open('$CONFIG_FILE')).get('server', '$SERVER'))")
