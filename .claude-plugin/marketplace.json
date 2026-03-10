@@ -6,30 +6,27 @@
   },
   "metadata": {
     "description": "A plugin marketplace with useful tools for Claude Code",
-    "version": "1.0.0",
-    "pluginRoot": "./plugins"
+    "version": "1.0.0"
   },
   "plugins": [
     {
       "name": "tgbot",
-      "source": "./tgbot",
+      "source": "./plugins/tgbot",
       "description": "Generate Telegram Bot projects with python-telegram-bot",
       "version": "1.0.0",
       "author": {
         "name": "Jimyth"
       },
-      "category": "development",
       "keywords": ["telegram", "bot", "python", "generator"]
     },
     {
       "name": "halosee-zd",
-      "source": "./halosee-zd",
+      "source": "./plugins/halosee-zd",
       "description": "禅道任务管理插件 - 创建、查看、完成禅道任务并统计工时",
       "version": "1.0.0",
       "author": {
         "name": "Jimyth"
       },
-      "category": "productivity",
       "keywords": ["zentao", "禅道", "task", "工时", "项目管理"]
     }
   ]
