@@ -36,6 +36,12 @@ Claude 会自动：
 /zd-create 实现用户登录功能 --execution 7 --estimate 16
 ```
 
+### 方式三：不自动启动
+
+```
+/zd-create 实现用户登录功能 --execution 7 --no-start
+```
+
 ## 执行步骤
 
 ### 1. 解析任务名称
@@ -59,6 +65,7 @@ bash "$ZD_SCRIPT" create \
   --name "<任务名称>" \
   --execution <执行ID> \
   --estimate <工时，默认8>
+# 任务会自动指派给当前用户并启动
 ```
 
 ## 参数说明
@@ -70,5 +77,15 @@ bash "$ZD_SCRIPT" create \
 | --estimate | 参数 | 8 |
 | --type | 参数 | devel |
 | --pri | 参数 | 3 |
+| --assignedTo | 参数 | 当前用户 |
+| --no-start | 参数 | false (自动启动) |
 
 **任务类型**：devel(开发)、design(设计)、test(测试)、study(研究)、discuss(讨论)、ui(界面)、affair(事务)、misc(其他)
+
+## 自动行为
+
+创建任务时会自动：
+1. **指派给自己**：任务默认指派给当前登录用户
+2. **自动启动**：创建成功后自动将任务状态改为"进行中"
+
+如需禁用自动启动，添加 `--no-start` 参数。

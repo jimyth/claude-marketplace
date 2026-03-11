@@ -281,7 +281,7 @@ do_executions() {
 }
 
 do_create() {
-    local name="" execution="" type="devel" pri=3 estimate="8" desc="" assignedTo="" story="" left="" deadline=""
+    local name="" execution="" type="devel" pri=3 estimate="8" desc="" assignedTo="" story="" left="" deadline="" no_start=false
 
     while [[ $# -gt 0 ]]; do
         case "$1" in
@@ -295,12 +295,19 @@ do_create() {
             --assignedTo) assignedTo="$2"; shift 2 ;;
             --story) story="$2"; shift 2 ;;
             --deadline) deadline="$2"; shift 2 ;;
+            --no-start) no_start=true; shift ;;
             *) shift ;;
         esac
     done
 
     [ -z "$name" ] && error "Task name required: --name <name>"
     [ -z "$execution" ] && error "Execution ID required: --execution <id>"
+
+    # 默认指派给自己
+    if [ -z "$assignedTo" ]; then
+        assignedTo=$(get_account)
+        [ -z "$assignedTo" ] && error "Account not configured. Run: zentao-api.sh config --account <account>"
+    fi
 
     # 剩余工时默认等于预计工时
     [ -z "$left" ] && left="$estimate"
@@ -311,12 +318,12 @@ do_create() {
     local default_deadline=$(date -v+7d +"%Y-%m-%d" 2>/dev/null || date -d "+7 days" +"%Y-%m-%d" 2>/dev/null || echo "")
     [ -z "$deadline" ] && deadline="$default_deadline"
 
-    # Build JSON data (realStarted 由 start 操作自动设置)
+    # Build JSON data
     local data="{\"name\":\"$name\",\"type\":\"$type\",\"pri\":$pri,\"estimate\":$estimate,\"left\":$left,\"estStarted\":\"$estStarted\""
 
     [ -n "$deadline" ] && data="$data,\"deadline\":\"$deadline\""
     [ -n "$desc" ] && data="$data,\"desc\":\"$desc\""
-    [ -n "$assignedTo" ] && data="$data,\"assignedTo\":\"$assignedTo\""
+    data="$data,\"assignedTo\":\"$assignedTo\""
     [ -n "$story" ] && data="$data,\"story\":$story"
 
     data="$data}"
@@ -327,7 +334,18 @@ do_create() {
 
     if is_api_success "$result"; then
         local task_id=$(echo "$result" | jq -r '.id // .data.id // "unknown"')
-        success "Task #$task_id created: $name"
+        success "Task #$task_id created: $name (assigned to: $assignedTo)"
+
+        # 自动启动任务
+        if [ "$no_start" = false ] && [ "$task_id" != "unknown" ]; then
+            echo "Starting task #$task_id..."
+            local start_result=$(api_post "/tasks/$task_id/start" "{\"left\":$left}")
+            if is_api_success "$start_result"; then
+                success "Task #$task_id started"
+            else
+                warn "Task created but failed to start: $(parse_api_error "$start_result")"
+            fi
+        fi
     else
         error "Failed to create task: $(parse_api_error "$result")"
     fi
@@ -540,9 +558,10 @@ case "${1:-}" in
         echo "  --estimate    Estimated hours (default: 8)"
         echo "  --left        Remaining hours (default: same as estimate)"
         echo "  --desc        Task description"
-        echo "  --assignedTo  Assign to account"
+        echo "  --assignedTo  Assign to account (default: current user)"
         echo "  --story       Related story ID"
         echo "  --deadline    Deadline date (default: 7 days later)"
+        echo "  --no-start    Don't auto-start after creation"
         echo ""
         echo "Config options:"
         echo "  --url         Zentao server URL"

@@ -1,5 +1,6 @@
 {
   "name": "tgbot",
+  "version": "1.0.0",
   "description": "Generate Telegram Bot projects with python-telegram-bot",
   "author": {
     "name": "Jimyth"
