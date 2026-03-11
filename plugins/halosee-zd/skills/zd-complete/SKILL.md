@@ -13,7 +13,7 @@ allowed-tools: Bash
 ## 脚本路径
 
 ```bash
-ZD_SCRIPT="${CLAUDE_SKILL_DIR}/../scripts/zentao-api.sh"
+ZD_SCRIPT="${CLAUDE_SKILL_DIR}/../../scripts/zentao-api.sh"
 ```
 
 ## 执行前确认
