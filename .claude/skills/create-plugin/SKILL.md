@@ -183,8 +183,7 @@ When a plugin includes executable scripts (e.g., shell scripts), use **dynamic p
 
 ```bash
 # Dynamic plugin path resolution (cache > user-level)
-PLUGIN_SCRIPT="$(find ~/.claude/plugins/cache -path '*/<plugin-name>/scripts/script.sh' 2>/dev/null | head -1)"
-[ -z "$PLUGIN_SCRIPT" ] && PLUGIN_SCRIPT="$HOME/.claude/plugins/<plugin-name>/scripts/script.sh"
+PLUGIN_SCRIPT="${CLAUDE_SKILL_DIR}/../scripts/script.sh"
 ```
 
 **Why this matters:**
@@ -199,8 +198,7 @@ PLUGIN_SCRIPT="$(find ~/.claude/plugins/cache -path '*/<plugin-name>/scripts/scr
 
 \`\`\`bash
 # Dynamic plugin path resolution
-MY_SCRIPT="$(find ~/.claude/plugins/cache -path '*/my-plugin/scripts/main.sh' 2>/dev/null | head -1)"
-[ -z "$MY_SCRIPT" ] && MY_SCRIPT="$HOME/.claude/plugins/my-plugin/scripts/main.sh"
+MY_SCRIPT="${CLAUDE_SKILL_DIR}/../scripts/main.sh"
 \`\`\`
 
 ## Usage

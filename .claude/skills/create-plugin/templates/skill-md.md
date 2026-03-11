@@ -109,26 +109,24 @@ Use `!`command`` syntax to inject command output:
 
 ## Script Path (Plugins with scripts)
 
-For plugins that include executable scripts, use **dynamic path resolution** instead of hardcoded paths. This ensures the plugin works correctly regardless of installation scope (project-level or user-level).
+For plugins that include executable scripts, use **`${CLAUDE_SKILL_DIR}`** variable:
 
-**Pattern:**
+**Correct approach:**
 
 ```bash
-# Dynamic plugin path resolution (cache > user-level)
-SCRIPT_PATH="$(find ~/.claude/plugins/cache -path '*/<plugin-name>/scripts/main.sh' 2>/dev/null | head -1)"
-[ -z "$SCRIPT_PATH" ] && SCRIPT_PATH="$HOME/.claude/plugins/<plugin-name>/scripts/main.sh"
+SCRIPT_PATH="${CLAUDE_SKILL_DIR}/../scripts/main.sh"
 ```
+
+**Why:**
+- `${CLAUDE_SKILL_DIR}` is the official variable pointing to the SKILL.md directory
+- Works regardless of installation scope (project-level or user-level)
+- No need for fallback logic
 
 **Usage:**
 
 ```bash
 bash "$SCRIPT_PATH" --option value
 ```
-
-**Why:**
-- Plugins can be installed at project scope (`./.claude/plugins/`) or user scope (`~/.claude/plugins/`)
-- Hardcoded paths break when installed at a different scope
-- The fallback ensures the script is found in either location
 
 ## Examples
 
@@ -204,8 +202,7 @@ allowed-tools: Bash
 
 \`\`\`bash
 # 动态查找插件脚本（按优先级：缓存目录 > 用户级）
-ZD_SCRIPT="$(find ~/.claude/plugins/cache -path '*/halosee-zd/*/scripts/zentao-api.sh' 2>/dev/null | head -1)"
-[ -z "$ZD_SCRIPT" ] && ZD_SCRIPT="$HOME/.claude/plugins/halosee-zd/scripts/zentao-api.sh"
+ZD_SCRIPT="${CLAUDE_SKILL_DIR}/../scripts/zentao-api.sh"
 \`\`\`
 
 ## 使用方法
