@@ -44,15 +44,30 @@ do_create() {
     local default_deadline=$(date -v+7d +"%Y-%m-%d" 2>/dev/null || date -d "+7 days" +"%Y-%m-%d" 2>/dev/null || echo "")
     [ -z "$deadline" ] && deadline="$default_deadline"
 
-    # Build JSON data
-    local data="{\"name\":\"$name\",\"type\":\"$type\",\"pri\":$pri,\"estimate\":$estimate,\"left\":$left,\"estStarted\":\"$estStarted\""
-
-    [ -n "$deadline" ] && data="$data,\"deadline\":\"$deadline\""
-    [ -n "$desc" ] && data="$data,\"desc\":\"$desc\""
-    data="$data,\"assignedTo\":\"$assignedTo\""
-    [ -n "$story" ] && data="$data,\"story\":$story"
-
-    data="$data}"
+    # Build JSON data using jq for proper escaping
+    local data=$(jq -n \
+        --arg name "$name" \
+        --arg type "$type" \
+        --argjson pri "$pri" \
+        --argjson estimate "$estimate" \
+        --argjson left "$left" \
+        --arg estStarted "$estStarted" \
+        --arg deadline "$deadline" \
+        --arg desc "$desc" \
+        --arg assignedTo "$assignedTo" \
+        --argjson story "${story:-null}" \
+        '{
+            name: $name,
+            type: $type,
+            pri: $pri,
+            estimate: $estimate,
+            left: $left,
+            estStarted: $estStarted,
+            deadline: (if $deadline != "" then $deadline else null end),
+            desc: (if $desc != "" then $desc else null end),
+            assignedTo: $assignedTo,
+            story: (if $story != null then $story else null end)
+        } | with_entries(select(.value != null))')
 
     echo "Creating task..."
     # API endpoint: POST /executions/:executionID/tasks
