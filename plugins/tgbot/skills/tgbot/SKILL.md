@@ -1,6 +1,9 @@
 ---
 name: tgbot
 description: Generate a complete Telegram Bot project using python-telegram-bot. Use when user wants to create a Telegram bot.
+argument-hint: [bot-name]
+disable-model-invocation: true
+allowed-tools: Bash, Write
 ---
 
 # Generate Telegram Bot

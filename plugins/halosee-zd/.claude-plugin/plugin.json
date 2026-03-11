@@ -1,10 +1,7 @@
 {
   "name": "halosee-zd",
-  "version": "1.0.0",
   "description": "禅道任务管理插件 - 创建、查看、完成禅道任务并统计工时",
   "author": {
     "name": "Jimyth"
-  },
-  "license": "MIT",
-  "keywords": ["zentao", "禅道", "task", "工时", "项目管理"]
+  }
 }

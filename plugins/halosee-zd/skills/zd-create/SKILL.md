@@ -1,6 +1,9 @@
 ---
 name: zd-create
-description: 创建禅道任务，argument-hint: <任务名称>
+description: 创建禅道任务
+argument-hint: <任务名称>
+disable-model-invocation: true
+allowed-tools: Bash
 ---
 
 # 创建禅道任务

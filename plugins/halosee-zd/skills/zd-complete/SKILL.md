@@ -2,6 +2,8 @@
 name: zd-complete
 description: 完成一个禅道任务
 argument-hint: --id <任务ID> [--consumed <工时>] [--note <备注>]
+disable-model-invocation: true
+allowed-tools: Bash
 ---
 
 # 完成禅道任务

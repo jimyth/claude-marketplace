@@ -31,9 +31,22 @@ Each plugin must follow this structure:
 plugins/<plugin-name>/
 ├── .claude-plugin/
 │   └── plugin.json       # Plugin metadata (required)
-└── skills/
-    └── <skill-name>/     # At least one skill
-        └── SKILL.md      # Skill definition (required)
+├── skills/               # Agent Skills with SKILL.md files
+│   └── <skill-name>/
+│       ├── SKILL.md      # Skill definition (required)
+│       ├── scripts/      # Optional scripts
+│       └── examples/     # Optional examples
+└── README.md             # Documentation (optional)
+```
+
+**Alternative**: For simple commands, you can use `commands/` directory:
+
+```
+plugins/<plugin-name>/
+├── .claude-plugin/
+│   └── plugin.json
+└── commands/
+    └── <command>.md      # Simple command file
 ```
 
 ## Implementation Steps
@@ -61,27 +74,19 @@ Create `plugins/<plugin-name>/.claude-plugin/plugin.json`:
 ```json
 {
   "name": "<plugin-name>",
-  "version": "1.0.0",
   "description": "<description from user>",
   "author": {
     "name": "<ask user or use default>"
-  },
-  "license": "MIT",
-  "keywords": ["<relevant>", "<keywords>"],
-  "category": "<development|productivity|integration|other>"
+  }
 }
 ```
 
 **Required fields:**
 - `name`: Plugin identifier (matches directory name)
-- `version`: Semantic version (start with "1.0.0")
 - `description`: What the plugin does
 
 **Optional fields:**
 - `author`: Author information
-- `license`: License type (default: MIT)
-- `keywords`: Array of relevant keywords
-- `category`: Plugin category
 
 ### Step 4: Create SKILL.md
 
@@ -96,6 +101,8 @@ The skill name typically matches the plugin name for simplicity.
 name: <skill-name>
 description: <What this skill does. When should Claude use it?>
 argument-hint: [optional-args]
+disable-model-invocation: true
+allowed-tools: <tools needed>
 ---
 
 # <Skill Title>
@@ -131,14 +138,8 @@ Add the new plugin to `.claude-plugin/marketplace.json`:
     // ... existing plugins ...
     {
       "name": "<plugin-name>",
-      "source": "./<plugin-name>",
-      "description": "<description>",
-      "version": "1.0.0",
-      "author": {
-        "name": "<author>"
-      },
-      "category": "<category>",
-      "keywords": ["<keywords>"]
+      "source": "./plugins/<plugin-name>",
+      "description": "<description>"
     }
   ]
 }
@@ -149,7 +150,7 @@ Add the new plugin to `.claude-plugin/marketplace.json`:
 Show the user:
 1. Created directory structure
 2. Files created
-3. How to use the new plugin: `/<plugin-name>:<skill-name>`
+3. How to use the new plugin: `/plugin-name:skill-name`
 
 ## Skill Frontmatter Reference
 
@@ -172,6 +173,7 @@ Show the user:
 4. **Examples**: Include usage examples in SKILL.md
 5. **Arguments**: Use `$ARGUMENTS`, `$0`, `$1` for parameterized skills
 6. **Dynamic Script Paths**: Use dynamic path resolution for scripts (see below)
+7. **Use disable-model-invocation**: For user-triggered actions like `/deploy`, `/commit`
 
 ### Dynamic Script Paths
 
@@ -180,15 +182,15 @@ When a plugin includes executable scripts (e.g., shell scripts), use **dynamic p
 **Recommended Pattern:**
 
 ```bash
-# Dynamic plugin path resolution (project-level > user-level)
-PLUGIN_SCRIPT="$(find . -path '*/.claude/plugins/<plugin-name>/scripts/script.sh' 2>/dev/null | head -1)"
+# Dynamic plugin path resolution (cache > user-level)
+PLUGIN_SCRIPT="$(find ~/.claude/plugins/cache -path '*/<plugin-name>/scripts/script.sh' 2>/dev/null | head -1)"
 [ -z "$PLUGIN_SCRIPT" ] && PLUGIN_SCRIPT="$HOME/.claude/plugins/<plugin-name>/scripts/script.sh"
 ```
 
 **Why this matters:**
 - Plugins can be installed at project scope (`./.claude/plugins/`) or user scope (`~/.claude/plugins/`)
 - Hardcoded paths break when installed at a different scope
-- The `find` command searches recursively from current directory, covering subdirectories
+- The `find` command searches the cache directory first
 
 **Example in SKILL.md:**
 
@@ -197,7 +199,7 @@ PLUGIN_SCRIPT="$(find . -path '*/.claude/plugins/<plugin-name>/scripts/script.sh
 
 \`\`\`bash
 # Dynamic plugin path resolution
-MY_SCRIPT="$(find . -path '*/.claude/plugins/my-plugin/scripts/main.sh' 2>/dev/null | head -1)"
+MY_SCRIPT="$(find ~/.claude/plugins/cache -path '*/my-plugin/scripts/main.sh' 2>/dev/null | head -1)"
 [ -z "$MY_SCRIPT" ] && MY_SCRIPT="$HOME/.claude/plugins/my-plugin/scripts/main.sh"
 \`\`\`
 

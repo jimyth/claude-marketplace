@@ -8,30 +8,35 @@ This template shows the structure for a Claude Code plugin's `plugin.json` file.
 plugins/<plugin-name>/.claude-plugin/plugin.json
 ```
 
-## Complete Template
+## Official Standard
+
+According to the official Claude Code documentation, `plugin.json` requires only:
+
+- `name`: Plugin identifier
+- `description`: What the plugin does
+- `author`: (optional) Author information
+
+## Minimal Template (Recommended)
 
 ```json
 {
   "name": "plugin-name",
-  "version": "1.0.0",
+  "description": "Brief description of what this plugin does",
+  "author": {
+    "name": "Author Name"
+  }
+}
+```
+
+## Full Template (With Optional Fields)
+
+```json
+{
+  "name": "plugin-name",
   "description": "Brief description of what this plugin does",
   "author": {
     "name": "Author Name",
     "email": "author@example.com"
-  },
-  "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/user/repo"
-  },
-  "keywords": [
-    "keyword1",
-    "keyword2",
-    "keyword3"
-  ],
-  "category": "development",
-  "compatibility": {
-    "claudeCode": ">=1.0.33"
   }
 }
 ```
@@ -43,7 +48,6 @@ plugins/<plugin-name>/.claude-plugin/plugin.json
 | Field | Type | Description |
 |-------|------|-------------|
 | `name` | string | Plugin identifier (kebab-case, must match directory name) |
-| `version` | string | Semantic version (e.g., "1.0.0") |
 | `description` | string | Brief description of plugin functionality |
 
 ### Optional Fields
@@ -53,25 +57,12 @@ plugins/<plugin-name>/.claude-plugin/plugin.json
 | `author` | object | Author information |
 | `author.name` | string | Author's name |
 | `author.email` | string | Author's email |
-| `license` | string | License type (e.g., "MIT", "Apache-2.0") |
-| `repository` | object | Source repository information |
-| `repository.type` | string | Usually "git" |
-| `repository.url` | string | Repository URL |
-| `keywords` | array | Array of relevant keywords for discovery |
-| `category` | string | Plugin category |
-| `compatibility` | object | Compatibility requirements |
-| `compatibility.claudeCode` | string | Required Claude Code version |
 
-## Categories
+## Notes
 
-Common categories include:
-- `development` - Development tools
-- `productivity` - Productivity enhancements
-- `integration` - External service integrations
-- `code-quality` - Linting, formatting, analysis
-- `documentation` - Documentation tools
-- `testing` - Testing utilities
-- `other` - Everything else
+- Keep `plugin.json` minimal and focused
+- Additional metadata like `version`, `license`, `keywords` are not part of the official spec
+- The marketplace system handles versioning separately
 
 ## Examples
 
@@ -80,35 +71,23 @@ Common categories include:
 ```json
 {
   "name": "my-plugin",
-  "version": "1.0.0",
   "description": "A simple plugin"
 }
 ```
 
-### Full Plugin
+### Plugin with Author
 
 ```json
 {
-  "name": "advanced-tool",
-  "version": "2.1.0",
-  "description": "Advanced tool with multiple features for code analysis",
+  "name": "halosee-zd",
+  "description": "禅道任务管理插件 - 创建、查看、完成禅道任务并统计工时",
   "author": {
-    "name": "Developer Name",
-    "email": "dev@example.com"
-  },
-  "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/user/advanced-tool"
-  },
-  "keywords": [
-    "analysis",
-    "code-quality",
-    "linting"
-  ],
-  "category": "code-quality",
-  "compatibility": {
-    "claudeCode": ">=1.0.33"
+    "name": "Jimyth"
   }
 }
 ```
+
+## Official Documentation
+
+- Plugins: https://code.claude.com/docs/en/plugins
+- Plugins Reference: https://code.claude.com/docs/en/reference/plugins

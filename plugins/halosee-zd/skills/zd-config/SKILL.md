@@ -2,6 +2,8 @@
 name: zd-config
 description: 配置禅道服务器连接信息
 argument-hint: [--url|--account|--password|--cycle|--show|--test]
+disable-model-invocation: true
+allowed-tools: Bash
 ---
 
 # 配置禅道连接

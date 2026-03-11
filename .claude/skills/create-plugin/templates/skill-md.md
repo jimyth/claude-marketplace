@@ -24,8 +24,6 @@ argument-hint: [optional] [arguments]
 disable-model-invocation: false
 user-invocable: true
 allowed-tools: Read, Write, Edit, Glob, Grep, Bash
-context: fork
-agent: Explore
 ---
 
 # Skill Title
@@ -36,9 +34,9 @@ Brief introduction to what this skill does.
 
 Describe how to use this skill:
 
-```
+\`\`\`
 /skill-name <required-arg> [optional-arg]
-```
+\`\`\`
 
 - `<required-arg>`: Description of required argument
 - `[optional-arg]`: Description of optional argument
@@ -53,10 +51,10 @@ Detailed explanation of the skill's purpose and behavior.
 
 Instructions for the first step.
 
-```bash
+\`\`\`bash
 # Example code if needed
 echo "Step 1"
-```
+\`\`\`
 
 ### 2. Second Step
 
@@ -66,56 +64,10 @@ Instructions for the second step.
 
 Instructions for the third step.
 
-## Script Path (Plugins with scripts)
-
-For plugins that include executable scripts, use **dynamic path resolution** instead of hardcoded paths. This ensures the plugin works correctly regardless of installation scope (project-level or user-level).
-
-**Pattern:**
-
-```bash
-# Dynamic plugin path resolution (project-level > user-level)
-SCRIPT_PATH="$(find . -path '*/.claude/plugins/<plugin-name>/scripts/main.sh' 2>/dev/null | head -1)"
-[ -z "$SCRIPT_PATH" ] && SCRIPT_PATH="$HOME/.claude/plugins/<plugin-name>/scripts/main.sh"
-```
-
-**Usage:**
-
-```bash
-bash "$SCRIPT_PATH" --option value
-```
-
-**Why:**
-- Plugins can be installed at project scope (`./.claude/plugins/`) or user scope (`~/.claude/plugins/`)
-- Hardcoded paths break when installed at a different scope
-- The fallback ensures the script is found in either location
-
-## Examples
-
-### Example 1: Basic Usage
-
-```
-/skill-name my-project
-```
-
-Expected output or behavior.
-
-### Example 2: With Optional Arguments
-
-```
-/skill-name my-project --verbose
-```
-
-Expected output or behavior.
-
 ## Notes
 
 - Important note 1
 - Important note 2
-
-## Related Resources
-
-- Link to related documentation
-- Link to related skills
 ```
 
 ## Frontmatter Reference
@@ -154,6 +106,29 @@ Use `!`command`` syntax to inject command output:
 
 !`git branch --show-current`
 ```
+
+## Script Path (Plugins with scripts)
+
+For plugins that include executable scripts, use **dynamic path resolution** instead of hardcoded paths. This ensures the plugin works correctly regardless of installation scope (project-level or user-level).
+
+**Pattern:**
+
+```bash
+# Dynamic plugin path resolution (cache > user-level)
+SCRIPT_PATH="$(find ~/.claude/plugins/cache -path '*/<plugin-name>/scripts/main.sh' 2>/dev/null | head -1)"
+[ -z "$SCRIPT_PATH" ] && SCRIPT_PATH="$HOME/.claude/plugins/<plugin-name>/scripts/main.sh"
+```
+
+**Usage:**
+
+```bash
+bash "$SCRIPT_PATH" --option value
+```
+
+**Why:**
+- Plugins can be installed at project scope (`./.claude/plugins/`) or user scope (`~/.claude/plugins/`)
+- Hardcoded paths break when installed at a different scope
+- The fallback ensures the script is found in either location
 
 ## Examples
 
@@ -210,6 +185,40 @@ Research $ARGUMENTS thoroughly:
 4. Summarize findings with file references
 ```
 
+### Plugin with Script
+
+```markdown
+---
+name: zd-list
+description: 查看我的禅道任务列表
+argument-hint: [--status wait|doing|done]
+disable-model-invocation: true
+allowed-tools: Bash
+---
+
+# 查看我的任务
+
+查看指派给当前用户的任务列表。
+
+## 脚本路径
+
+\`\`\`bash
+# 动态查找插件脚本（按优先级：缓存目录 > 用户级）
+ZD_SCRIPT="$(find ~/.claude/plugins/cache -path '*/halosee-zd/*/scripts/zentao-api.sh' 2>/dev/null | head -1)"
+[ -z "$ZD_SCRIPT" ] && ZD_SCRIPT="$HOME/.claude/plugins/halosee-zd/scripts/zentao-api.sh"
+\`\`\`
+
+## 使用方法
+
+\`\`\`bash
+# 查看所有我的任务
+bash "$ZD_SCRIPT" list
+
+# 只看进行中的任务
+bash "$ZD_SCRIPT" list --status doing
+\`\`\`
+```
+
 ## Best Practices
 
 1. **Clear Description**: Help Claude understand when to use the skill
@@ -217,8 +226,10 @@ Research $ARGUMENTS thoroughly:
 3. **Examples**: Show usage examples
 4. **Keep It Focused**: Each skill should do one thing well
 5. **Use Arguments**: Make skills reusable with `$ARGUMENTS`
-6. **Supporting Files**: For complex skills, use separate files:
-   - `template.md` - Output templates
-   - `examples/` - Example files
-   - `scripts/` - Utility scripts
-7. **Dynamic Script Paths**: For plugins with executable scripts, use dynamic path resolution instead of hardcoded paths (see section above)
+6. **Use disable-model-invocation**: For user-triggered actions like `/deploy`, `/commit`
+7. **Dynamic Script Paths**: For plugins with executable scripts, use dynamic path resolution
+
+## Official Documentation
+
+- Skills: https://code.claude.com/docs/en/skills
+- Plugins: https://code.claude.com/docs/en/plugins

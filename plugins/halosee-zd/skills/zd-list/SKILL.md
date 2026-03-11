@@ -2,6 +2,8 @@
 name: zd-list
 description: 查看我的禅道任务列表
 argument-hint: [--status wait|doing|done]
+disable-model-invocation: true
+allowed-tools: Bash
 ---
 
 # 查看我的任务

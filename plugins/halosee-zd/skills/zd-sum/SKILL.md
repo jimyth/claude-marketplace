@@ -2,6 +2,8 @@
 name: zd-sum
 description: 统计指定周期的任务工时
 argument-hint: <YYYYMM>
+disable-model-invocation: true
+allowed-tools: Bash
 ---
 
 # 工时统计

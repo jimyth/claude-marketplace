@@ -2,6 +2,8 @@
 name: zd
 description: 禅道任务管理 - 显示帮助信息和可用命令
 argument-hint: [command]
+disable-model-invocation: true
+allowed-tools: Bash
 ---
 
 # 禅道任务管理
