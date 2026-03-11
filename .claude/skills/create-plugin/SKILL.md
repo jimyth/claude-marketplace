@@ -183,7 +183,7 @@ When a plugin includes executable scripts (e.g., shell scripts), use **dynamic p
 
 ```bash
 # Dynamic plugin path resolution (cache > user-level)
-PLUGIN_SCRIPT="${CLAUDE_SKILL_DIR}/../scripts/script.sh"
+PLUGIN_SCRIPT="${CLAUDE_SKILL_DIR}/../../scripts/script.sh"
 ```
 
 **Why this matters:**
@@ -198,7 +198,7 @@ PLUGIN_SCRIPT="${CLAUDE_SKILL_DIR}/../scripts/script.sh"
 
 \`\`\`bash
 # Dynamic plugin path resolution
-MY_SCRIPT="${CLAUDE_SKILL_DIR}/../scripts/main.sh"
+MY_SCRIPT="${CLAUDE_SKILL_DIR}/../../scripts/main.sh"
 \`\`\`
 
 ## Usage

@@ -114,7 +114,7 @@ For plugins that include executable scripts, use **`${CLAUDE_SKILL_DIR}`** varia
 **Correct approach:**
 
 ```bash
-SCRIPT_PATH="${CLAUDE_SKILL_DIR}/../scripts/main.sh"
+SCRIPT_PATH="${CLAUDE_SKILL_DIR}/../../scripts/main.sh"
 ```
 
 **Why:**
@@ -202,7 +202,7 @@ allowed-tools: Bash
 
 \`\`\`bash
 # 动态查找插件脚本（按优先级：缓存目录 > 用户级）
-ZD_SCRIPT="${CLAUDE_SKILL_DIR}/../scripts/zentao-api.sh"
+ZD_SCRIPT="${CLAUDE_SKILL_DIR}/../../scripts/zentao-api.sh"
 \`\`\`
 
 ## 使用方法
