@@ -255,14 +255,56 @@ do_config() {
     done
 }
 
-do_projects() {
+# 选择项目（交互式）
+select_project() {
     echo "Fetching projects..."
     local result=$(api_get "/projects")
 
     if is_api_success "$result"; then
-        echo "$result" | jq -r '.projects[]? // .[]? | "\(.id)\t\(.name)\t\(.status)"' | column -t -s $'\t'
+        local projects=$(echo "$result" | jq -r '.projects[]? // .[]? | sort_by(.id) | .[]')
+
+        if [ -z "$projects" ]; then
+            echo "No projects found."
+            return
+        fi
+
+        echo ""
+        echo "Available projects:"
+        echo "$projects" | while IFS=2; do
+            echo "  [$id] $name"
+        done
+        echo ""
+        read -p "Select project ID: " project_id
+        echo "$project_id"
     else
         error "Failed to get projects: $(parse_api_error "$result")"
+    fi
+}
+
+# 选择执行（交互式)
+select_execution() {
+    local project_id="$1"
+    echo "Fetching executions for project #$project_id..."
+    local result=$(api_get "/projects/$project_id/executions")
+
+    if is_api_success "$result"; then
+        local executions=$(echo "$result" | jq -r '.executions[]? // .[]? | sort_by(.id) | .[]')
+
+        if [ -z "$executions" ]; then
+            echo "No executions found."
+            return
+        fi
+
+        echo ""
+        echo "Available executions:"
+        echo "$executions" | while Ifs=2; do
+            echo "  [$id] $name"
+        done
+        echo ""
+        read -p "Select execution ID: " execution_id
+        echo "$execution_id"
+    else
+        error "Failed to get executions: $(parse_api_error "$result")"
     fi
 }
 
