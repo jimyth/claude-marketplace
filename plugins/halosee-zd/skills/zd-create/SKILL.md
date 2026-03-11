@@ -13,8 +13,11 @@ allowed-tools: Bash
 ## 脚本路径
 
 ```bash
-ZD_SCRIPT="$(find ~/.claude/plugins/cache -path '*/halosee-zd/*/scripts/zentao-api.sh' 2>/dev/null | head -1)"
-[ -z "$ZD_SCRIPT" ] && ZD_SCRIPT="$HOME/.claude/plugins/halosee-zd/scripts/zentao-api.sh"
+# 优先使用 marketplaces 目录下的最新版本，然后按版本号降序查找缓存
+ZD_SCRIPT="$HOME/.claude/plugins/marketplaces/jimyth-skills/plugins/halosee-zd/scripts/zentao-api.sh"
+if [ ! -f "$ZD_SCRIPT" ]; then
+    ZD_SCRIPT="$(find ~/.claude/plugins/cache -path '*/halosee-zd/*/scripts/zentao-api.sh' 2>/dev/null | sort -rV | head -1)"
+fi
 ```
 
 ## 使用方式
