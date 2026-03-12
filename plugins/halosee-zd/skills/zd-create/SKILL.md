@@ -13,7 +13,13 @@ allowed-tools: Bash
 ## 脚本路径
 
 ```bash
-ZD_SCRIPT="${CLAUDE_SKILL_DIR}/../../scripts/zentao-api.sh"
+ZD_SCRIPT="${CLAUDE_SKILL_DIR}/../src/index.ts"
+```
+
+## 创建任务命令
+
+```bash
+npx tsx "$ZD_SCRIPT" create --name "<任务名称>" --execution <执行ID> --desc "<任务描述>"
 ```
 
 ## 使用方式

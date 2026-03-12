@@ -13,27 +13,27 @@ allowed-tools: Bash
 ## 脚本路径
 
 ```bash
-ZD_SCRIPT="${CLAUDE_SKILL_DIR}/../../scripts/zentao-api.sh"
+ZD_SCRIPT="${CLAUDE_SKILL_DIR}/../src/index.ts"
 ```
 
 ## 执行前确认
 
 完成任务前，请先**查看进行中的任务**确认任务 ID：
 ```bash
-bash "$ZD_SCRIPT" list --status doing
+npx tsx "$ZD_SCRIPT" list --status doing --execution <execution_id>
 ```
 
 ## 使用方法
 
 ```bash
 # 完成任务（默认消耗 1 小时）
-bash "$ZD_SCRIPT" finish --id <task_id>
+npx tsx "$ZD_SCRIPT" finish <task_id>
 
 # 指定实际消耗工时
-bash "$ZD_SCRIPT" finish --id <task_id> --consumed 4
+npx tsx "$ZD_SCRIPT" finish <task_id> --consumed 4
 
 # 添加完成备注
-bash "$ZD_SCRIPT" finish --id <task_id> --consumed 4 --note "功能完成，测试通过"
+npx tsx "$ZD_SCRIPT" finish <task_id> --consumed 4 --note "功能完成，测试通过"
 ```
 
 ## 参数说明

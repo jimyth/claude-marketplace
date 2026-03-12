@@ -13,20 +13,20 @@ allowed-tools: Bash
 ## 脚本路径
 
 ```bash
-ZD_SCRIPT="${CLAUDE_SKILL_DIR}/../../scripts/zentao-api.sh"
+ZD_SCRIPT="${CLAUDE_SKILL_DIR}/../src/index.ts"
 ```
 
 ## 使用方法
 
 ```bash
 # 首次初始化 - 选择项目并生成配置
-/zd-init
+npx tsx "$ZD_SCRIPT" init
 
-# 刷新配置 - 重新从服务器获取最新信息
-/zd-init --refresh
+# 指定项目 ID 初始化
+npx tsx "$ZD_SCRIPT" init --project 8
 
 # 查看当前配置
-/zd-init --show
+npx tsx "$ZD_SCRIPT" init --show
 ```
 
 ## 执行步骤
@@ -34,7 +34,7 @@ ZD_SCRIPT="${CLAUDE_SKILL_DIR}/../../scripts/zentao-api.sh"
 ### 1. 执行初始化命令
 
 ```bash
-bash "$ZD_SCRIPT" init
+npx tsx "$ZD_SCRIPT" init
 ```
 
 ### 2. 选择项目

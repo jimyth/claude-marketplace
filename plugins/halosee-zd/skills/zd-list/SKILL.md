@@ -13,32 +13,19 @@ allowed-tools: Bash
 ## 脚本路径
 
 ```bash
-ZD_SCRIPT="${CLAUDE_SKILL_DIR}/../../scripts/zentao-api.sh"
+ZD_SCRIPT="${CLAUDE_SKILL_DIR}/../src/index.ts"
 ```
 
 ## 使用方法
 
-### 方式一：查看所有任务（遍历执行）
-
-```bash
-# 查看所有我的任务（遍历用户有权限的所有执行获取)
-bash "$ZD_SCRIPT" list
-
-# 只看进行中的任务
-bash "$ZD_SCRIPT" list --status doing
-
-# 只看已完成的任务
-bash "$ZD_SCRIPT" list --status done
-```
-
-### 方式二：查看指定执行的任务
+### 查看指定执行的任务
 
 ```bash
 # 查看执行 #7 下的任务
-bash "$ZD_SCRIPT" list --execution 7
+npx tsx "$ZD_SCRIPT" list --execution 7
 
 # 查看执行 #7 下进行中的任务
-bash "$ZD_SCRIPT" list --execution 7 --status doing
+npx tsx "$ZD_SCRIPT" list --execution 7 --status doing
 ```
 
 ## 获取逻辑说明
