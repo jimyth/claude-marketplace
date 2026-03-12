@@ -1,0 +1,36 @@
+{
+  "skill_name": "create-plugin",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Create a plugin called 'hello-world' that displays a greeting message",
+      "expected_output": "A complete plugin with plugin.json, SKILL.md, and proper directory structure",
+      "files": [],
+      "expectations": [
+        "The plugin directory 'plugins/hello-world' is created",
+        "The plugin.json file exists with correct metadata",
+        "The SKILL.md file exists with proper frontmatter",
+        "The marketplace.json is updated with the new plugin"
+      ],
+      "assertions": [
+        {"type": "file_exists", "path": "plugins/hello-world/.claude-plugin/plugin.json", "expected": true},
+        {"type": "file_exists", "path": "plugins/hello-world/skills/hello-world/SKILL.md", "expected": true},
+        {"type": "json_contains", "path": ".claude-plugin/marketplace.json", "query": ".plugins[].name", "expected": "hello-world"}
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Create a skill called 'code-analyzer' that analyzes code quality and complexity",
+      "expected_output": "A skill with instructions for analyzing code metrics and quality",
+      "files": [],
+      "expectations": [
+        "The skill SKILL.md contains analysis instructions",
+        "The skill description mentions code analysis or quality",
+        "The skill has proper usage examples"
+      ],
+      "assertions": [
+        {"type": "file_contains", "path": "plugins/code-analyzer/skills/code-analyzer/SKILL.md", "expected": "analyze", "description": "SKILL.md contains analysis instructions"}
+      ]
+    }
+  ]
+}

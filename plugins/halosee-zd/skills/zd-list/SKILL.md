@@ -1,7 +1,7 @@
 ---
 name: zd-list
 description: 查看我的禅道任务列表
-argument-hint: [--status wait|doing|done]
+argument-hint: [--status wait|doing|done] [--execution <id>]
 disable-model-invocation: true
 allowed-tools: Bash
 ---
@@ -18,12 +18,11 @@ ZD_SCRIPT="${CLAUDE_SKILL_DIR}/../../scripts/zentao-api.sh"
 
 ## 使用方法
 
-```bash
-# 查看所有我的任务
-bash "$ZD_SCRIPT" list
+### 方式一：查看所有任务（遍历执行）
 
-# 只看未开始的任务
-bash "$ZD_SCRIPT" list --status wait
+```bash
+# 查看所有我的任务（遍历用户有权限的所有执行获取)
+bash "$ZD_SCRIPT" list
 
 # 只看进行中的任务
 bash "$ZD_SCRIPT" list --status doing
@@ -31,6 +30,29 @@ bash "$ZD_SCRIPT" list --status doing
 # 只看已完成的任务
 bash "$ZD_SCRIPT" list --status done
 ```
+
+### 方式二：查看指定执行的任务
+
+```bash
+# 查看执行 #7 下的任务
+bash "$ZD_SCRIPT" list --execution 7
+
+# 查看执行 #7 下进行中的任务
+bash "$ZD_SCRIPT" list --execution 7 --status doing
+```
+
+## 获取逻辑说明
+
+**遍历所有任务**（不指定 --execution）:
+1. 获取用户有权限的所有项目
+2. 遍历每个项目的执行列表
+3. 从每个执行获取指派给当前用户的任务
+4. 合并并去重所有任务
+
+**Why**: 禅道 API 的任务列表接口需要指定执行 ID，无法直接获取所有任务。因此需要遍历执行来获取完整列表。
+
+**指定执行**（指定 --execution）:
+- 直接从指定执行获取任务列表，- 更快速，适合已知执行 ID 的场景
 
 ## 任务状态
 

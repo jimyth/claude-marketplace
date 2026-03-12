@@ -80,7 +80,8 @@ do_create() {
         # 自动启动任务
         if [ "$no_start" = false ] && [ "$task_id" != "unknown" ]; then
             echo "Starting task #$task_id..."
-            local start_result=$(api_post "/tasks/$task_id/start" "{\"left\":$left}")
+            # start API 需要传递 assignedTo，否则会清空指派人
+            local start_result=$(api_post "/tasks/$task_id/start" "{\"left\":$left,\"assignedTo\":\"$assignedTo\"}")
             if is_api_success "$start_result"; then
                 success "Task #$task_id started"
             else
@@ -93,32 +94,84 @@ do_create() {
 }
 
 do_list() {
-    local status=""
+    local status="" execution_id=""
 
     while [[ $# -gt 0 ]]; do
         case "$1" in
             --status) status="$2"; shift 2 ;;
+            --execution) execution_id="$2"; shift 2 ;;
             *) shift ;;
         esac
     done
 
-    echo "Fetching my tasks..."
-    local result=$(api_get "/tasks?assignedTo=$(get_account)")
+    local account=$(get_account)
 
-    if is_api_success "$result"; then
-        local tasks=$(echo "$result" | jq '.tasks // .')
+    if [ -n "$execution_id" ]; then
+        # 指定执行ID时，直接获取该执行下的任务
+        echo "Fetching tasks from execution #$execution_id..."
+        local result=$(api_get "/executions/$execution_id/tasks")
 
-        if [ -n "$status" ]; then
-            tasks=$(echo "$tasks" | jq --arg s "$status" '[.[] | select(.status == $s)]')
+        if is_api_success "$result"; then
+            local tasks=$(echo "$result" | jq '.tasks // .')
+            [ -n "$status" ] && tasks=$(echo "$tasks" | jq --arg s "$status" '[.[] | select(.status == $s)]')
+            _print_tasks "$tasks"
+        else
+            error "Failed to get tasks from execution: $(parse_api_error "$result")"
+        fi
+    else
+        # 遍历所有有权限的执行获取任务
+        echo "Fetching tasks from all accessible executions..."
+
+        # 获取用户有权限的项目列表
+        local projects_result=$(api_get "/projects")
+        if ! is_api_success "$projects_result"; then
+            error "Failed to get projects: $(parse_api_error "$projects_result")"
         fi
 
-        local count=$(echo "$tasks" | jq 'length')
-        echo "Found $count tasks:"
+        local project_ids=$(echo "$projects_result" | jq -r '.projects[]? // .[]? | .id' | tr '\n')
+        local all_tasks="[]"
+        local total_count=0
+
+        for pid in $project_ids; do
+            local execs_result=$(api_get "/projects/$pid/executions")
+            if ! is_api_success "$execs_result"; then
+                continue
+            fi
+
+            local exec_ids=$(echo "$execs_result" | jq -r '.executions[]? // .[]? | .id' | tr '\n')
+
+            for eid in $exec_ids; do
+                local tasks_result=$(api_get "/executions/$eid/tasks")
+                if is_api_success "$tasks_result"; then
+                    local tasks=$(echo "$tasks_result" | jq '.tasks // .')
+                    if [ "$tasks" != "null" ] && [ "$tasks" != "[]" ]; then
+                        # 过滤指派给当前用户的任务
+                        local my_tasks=$(echo "$tasks" | jq --arg acc "$account" '[.[] | select(.assignedTo.account == $acc)]')
+                        if [ "$my_tasks" != "null" ] && [ "$my_tasks" != "[]" ]; then
+                            all_tasks=$(echo "$all_tasks $my_tasks" | jq -s 'add' | jq 'unique_by(.id)')
+                            total_count=$((total_count + $(echo "$my_tasks" | jq 'length')))
+                        fi
+                    fi
+                fi
+            done
+        done
+
+        if [ -n "$status" ]; then
+            all_tasks=$(echo "$all_tasks" | jq --arg s "$status" '[.[] | select(.status == $s)]')
+        fi
+
+        echo "Found $total_count tasks:"
         echo ""
-        echo "$tasks" | jq -r '.[] | "[\(.id)] \(.name) (\(.status)) - \(.executionName // "No execution")"'
-    else
-        error "Failed to get tasks: $(parse_api_error "$result")"
+        echo "$all_tasks" | jq -r '.[] | "[\(.id)] \(.name) (\(.status)) - \(.executionName // "No execution")"'
     fi
+}
+
+_print_tasks() {
+    local tasks="$1"
+    local count=$(echo "$tasks" | jq 'length')
+    echo "Found $count tasks:"
+    echo ""
+    echo "$tasks" | jq -r '.[] | "[\(.id)] \(.name) (\(.status)) - \(.executionName // "No execution")"'
 }
 
 do_start() {
