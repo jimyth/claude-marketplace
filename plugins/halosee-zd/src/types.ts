@@ -16,7 +16,8 @@ export interface GlobalConfig {
 // 项目级配置
 export interface ProjectConfig {
   projectId: number;
-  projectName: string;
+  productId?: number;
+  productName: string;
   executions: Execution[];
   defaultExecution: number;
   taskTypes: Record<string, TaskTypeConfig>;
@@ -158,4 +159,109 @@ export interface FinishTaskArgs {
 
 export interface SumArgs {
   month?: string;
+}
+
+// 需求（Story）
+export interface Story {
+  id: number;
+  title: string;
+  product: number;
+  productName?: string;
+  module?: number;
+  moduleName?: string;
+  plan?: number;
+  planName?: string;
+  source?: string;
+  sourceNote?: string;
+  fromBug?: number;
+  pri: number;
+  estimate: number;
+  status: string;
+  stage: string;
+  assignedTo?: {
+    id: number;
+    account: string;
+    realname: string;
+  };
+  openedBy?: {
+    id: number;
+    account: string;
+    realname: string;
+  };
+  openedDate?: string;
+  reviewedBy?: string;
+  reviewedDate?: string;
+  closedBy?: string;
+  closedDate?: string;
+  closedReason?: string;
+  desc?: string;
+  spec?: string;
+  verify?: string;
+  children?: Story[];
+  linkStories?: string;
+  linkRequirements?: string;
+  twins?: string;
+  version: number;
+  deleted: boolean;
+  taskCount?: number;
+  bugCount?: number;
+  caseCount?: number;
+}
+
+export interface StoryCreateParams {
+  title: string;
+  product?: number;
+  module?: number;
+  plan?: number;
+  source?: string;
+  sourceNote?: string;
+  fromBug?: number;
+  pri?: number;
+  estimate?: number;
+  parent?: number;
+  assignedTo?: string;
+  spec?: string;
+  verify?: string;
+  linkStories?: string;
+  linkRequirements?: string;
+  twins?: string;
+  customFields?: Record<string, unknown>;
+}
+
+export interface StoriesResponse {
+  stories: Story[];
+  total?: number;
+}
+
+export interface CreateStoryArgs {
+  title: string;
+  product?: number;
+  module?: number;
+  plan?: number;
+  source?: string;
+  sourceNote?: string;
+  fromBug?: number;
+  pri?: number;
+  estimate?: number;
+  parent?: number;
+  assignedTo?: string;
+  spec?: string;
+  verify?: string;
+  linkStories?: string;
+  linkRequirements?: string;
+  twins?: string;
+}
+
+export interface ListStoriesArgs {
+  product?: number;
+  status?: string;
+  module?: number;
+  plan?: number;
+  assignedTo?: string;
+  limit?: number;
+  page?: number;
+}
+
+export interface ViewStoryArgs {
+  id: number;
 }

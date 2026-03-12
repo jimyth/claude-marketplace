@@ -7,9 +7,10 @@ import { configCommand } from './commands/config.js';
 import { listProjects, listExecutions } from './commands/projects.js';
 import { initCommand } from './commands/init.js';
 import { createTask, listTasks, viewTask, startTask, finishTask } from './commands/tasks.js';
+import { createStory, viewStory, listStories } from './commands/stories.js';
 import { sumCommand } from './commands/sum.js';
 
-const VERSION = '2.0.0';
+const VERSION = '2.1.0';
 
 function printHelp(): void {
   console.log(`
@@ -60,6 +61,21 @@ function printHelp(): void {
     --note <text>        完成备注
 
   sum [month]         工时统计 (月份格式: YYYYMM)
+
+  story               需求管理
+    create              创建需求
+      --title <title>     需求标题 (必填)
+      --product <id>      产品 ID (必填或从配置获取)
+      --pri <n>           优先级 (1-4, 默认 3)
+      --estimate <h>      预计工时
+      --assignedTo <user> 指派给
+      --spec <text>       需求描述
+      --verify <text>     验收标准
+    view <id>           查看需求详情
+    list                列出需求
+      --product <id>      产品 ID (必填或从配置获取)
+      --status <status>   过滤状态
+      --module <id>       过滤模块
 
 示例:
   npx tsx src/index.ts config --url http://localhost:8080 --account admin
@@ -223,6 +239,54 @@ async function main(): Promise<void> {
         await sumCommand({
           month: positional[0],
         });
+        break;
+
+      case 'story':
+        const storySubCommand = positional[0];
+        switch (storySubCommand) {
+          case 'create':
+            if (!options.title) {
+              console.error('错误: 需要需求标题 --title');
+              process.exit(1);
+            }
+            await createStory({
+              title: options.title as string,
+              product: options.product ? parseInt(options.product as string, 10) : undefined,
+              module: options.module ? parseInt(options.module as string, 10) : undefined,
+              plan: options.plan ? parseInt(options.plan as string, 10) : undefined,
+              pri: options.pri ? parseInt(options.pri as string, 10) : undefined,
+              estimate: options.estimate ? parseInt(options.estimate as string, 10) : undefined,
+              assignedTo: options.assignedTo as string,
+              spec: options.spec as string,
+              verify: options.verify as string,
+            });
+            break;
+
+          case 'view':
+            if (!positional[1]) {
+              console.error('错误: 需要需求 ID');
+              process.exit(1);
+            }
+            await viewStory({
+              id: parseInt(positional[1], 10),
+            });
+            break;
+
+          case 'list':
+            await listStories({
+              product: options.product ? parseInt(options.product as string, 10) : undefined,
+              status: options.status as string,
+              module: options.module ? parseInt(options.module as string, 10) : undefined,
+              plan: options.plan ? parseInt(options.plan as string, 10) : undefined,
+              assignedTo: options.assignedTo as string,
+            });
+            break;
+
+          default:
+            console.error(`未知 story 子命令: ${storySubCommand}`);
+            console.log('可用子命令: create, view, list');
+            process.exit(1);
+        }
         break;
 
       default:
