@@ -5,9 +5,10 @@
 LIB_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "${LIB_DIR}/common.sh"
 source "${LIB_DIR}/api.sh"
+source "${LIB_DIR}/init.sh"
 
 do_create() {
-    local name="" execution="" type="devel" pri=3 estimate="8" desc="" assignedTo="" story="" left="" deadline="" no_start=false
+    local name="" execution="" type="" pri="" estimate="" desc="" assignedTo="" story="" left="" deadline="" no_start=false
 
     while [[ $# -gt 0 ]]; do
         case "$1" in
@@ -27,7 +28,43 @@ do_create() {
     done
 
     [ -z "$name" ] && error "Task name required: --name <name>"
-    [ -z "$execution" ] && error "Execution ID required: --execution <id>"
+
+    # 尝试加载项目配置
+    local config=""
+    local has_config=1
+    config=$(load_project_config 2>/dev/null) || has_config=1
+    [ -n "$config" ] && has_config=0
+
+    if [ $has_config -eq 0 ]; then
+        echo "Using project config from .zd-project.json"
+
+        # 从配置获取默认值（如果用户未指定）
+        if [ -z "$execution" ]; then
+            execution=$(infer_execution "$name" "$desc" "$config")
+            echo "Auto-inferred execution: $execution"
+        fi
+
+        if [ -z "$type" ]; then
+            type=$(infer_task_type "$name" "$desc" "$config")
+            [ -z "$type" ] && type="devel"
+            echo "Auto-inferred type: $type"
+        fi
+
+        if [ -z "$pri" ]; then
+            pri=$(echo "$config" | jq -r '.defaults.pri // 3')
+        fi
+
+        if [ -z "$estimate" ]; then
+            estimate=$(echo "$config" | jq -r '.defaults.estimate // 8')
+        fi
+    else
+        # 无配置时使用默认值
+        [ -z "$type" ] && type="devel"
+        [ -z "$pri" ] && pri=3
+        [ -z "$estimate" ] && estimate=8
+    fi
+
+    [ -z "$execution" ] && error "Execution ID required: --execution <id> (or run /zd-init to configure defaults)"
 
     # 默认指派给自己
     if [ -z "$assignedTo" ]; then

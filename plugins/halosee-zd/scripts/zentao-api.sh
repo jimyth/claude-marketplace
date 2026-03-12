@@ -12,11 +12,13 @@ source "${SCRIPT_DIR}/lib/config.sh"
 source "${SCRIPT_DIR}/lib/projects.sh"
 source "${SCRIPT_DIR}/lib/tasks.sh"
 source "${SCRIPT_DIR}/lib/sum.sh"
+source "${SCRIPT_DIR}/lib/init.sh"
 
 # Main command dispatch
 case "${1:-}" in
     "login") shift; zentao_login ;;
     "config") shift; do_config "$@" ;;
+    "init") shift; do_init "$@" ;;
     "projects") shift; do_projects ;;
     "executions") shift; do_executions "$1" ;;
     "create") shift; do_create "$@" ;;
@@ -33,6 +35,7 @@ case "${1:-}" in
         echo "Commands:"
         echo "  login       Login and get token"
         echo "  config      Configure settings"
+        echo "  init        Initialize project config (.zd-project.json)"
         echo "  projects    List all projects"
         echo "  executions  List executions in a project"
         echo "  create      Create a new task"
