@@ -25,6 +25,9 @@ import type {
  * - 研发需求（项目级别）：POST /projects/{id}/stories
  *
  * 任务关联的是研发需求，默认创建研发需求
+ *
+ * API v2 支持 project 字段，可以直接创建项目关联的需求
+ * API v1 不支持 project 字段，只能创建产品级别的需求
  */
 export async function createStory(args: CreateStoryArgs): Promise<void> {
   const client = getClient();
@@ -72,12 +75,44 @@ export async function createStory(args: CreateStoryArgs): Promise<void> {
         data.product = config.productId;
       }
 
+      // 添加项目关联字段（API v2 支持）
+      data.project = project;
+
       console.log(`创建研发需求 (项目 #${project})...`);
-      result = await client.post<ApiResponse<{ id: number }>>(
-        `/projects/${project}/stories`,
-        data
-      );
-      storyId = result.id || result.data?.id;
+
+      // 首先尝试使用 API v2（支持 project 字段）
+      try {
+        result = await client.post<ApiResponse<{ id: number }>>(
+          `/stories`,
+          data,
+          'v2'
+        );
+        storyId = result.id || result.data?.id;
+
+        // 如果 API v2 返回空响应，回退到 API v1
+        if (!storyId) {
+          console.log('API v2 返回空响应，尝试 API v1...');
+          const v1Data = { ...data };
+          delete v1Data.project; // API v1 不支持 project 字段
+          result = await client.post<ApiResponse<{ id: number }>>(
+            `/projects/${project}/stories`,
+            v1Data,
+            'v1'
+          );
+          storyId = result.id || result.data?.id;
+        }
+      } catch (v2Error) {
+        // API v2 失败，回退到 API v1
+        console.log(`API v2 失败: ${v2Error}，尝试 API v1...`);
+        const v1Data = { ...data };
+        delete v1Data.project;
+        result = await client.post<ApiResponse<{ id: number }>>(
+          `/projects/${project}/stories`,
+          v1Data,
+          'v1'
+        );
+        storyId = result.id || result.data?.id;
+      }
 
       if (storyId) {
         printSuccess(`研发需求 #${storyId} 已创建: ${args.title}`);

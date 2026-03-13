@@ -100,14 +100,17 @@ export class ZentaoApiClient {
 
   /**
    * 发送 API 请求
+   * @param endpoint 端点路径（不含 /api.php/vX 前缀）
+   * @param apiVersion API 版本，默认 v1
    */
   async request<T>(
-    method: 'GET' | 'POST',
+    method: 'GET' | 'POST' | 'PUT' | 'DELETE',
     endpoint: string,
-    data?: unknown
+    data?: unknown,
+    apiVersion: 'v1' | 'v2' = 'v1'
   ): Promise<T> {
     const token = await this.getValidToken();
-    const url = `${this.baseUrl}/api.php/v1${endpoint}`;
+    const url = `${this.baseUrl}/api.php/${apiVersion}${endpoint}`;
 
     const options: RequestInit = {
       method,
@@ -117,7 +120,7 @@ export class ZentaoApiClient {
       },
     };
 
-    if (data && method === 'POST') {
+    if (data && (method === 'POST' || method === 'PUT')) {
       options.body = JSON.stringify(data);
     }
 
@@ -131,7 +134,7 @@ export class ZentaoApiClient {
         'Content-Type': 'application/json',
         'Token': newToken,
       };
-      if (data && method === 'POST') {
+      if (data && (method === 'POST' || method === 'PUT')) {
         options.body = JSON.stringify(data);
       }
       response = await fetch(url, options);
@@ -149,21 +152,50 @@ export class ZentaoApiClient {
       throw new Error(errorMessage);
     }
 
-    return response.json();
+    // 处理空响应（某些 API v2 端点可能返回空内容）
+    const contentLength = response.headers.get('content-length');
+    if (contentLength === '0') {
+      return {} as T;
+    }
+
+    const text = await response.text();
+    if (!text) {
+      return {} as T;
+    }
+
+    try {
+      return JSON.parse(text);
+    } catch {
+      return {} as T;
+    }
   }
 
   /**
    * GET 请求
    */
-  async get<T>(endpoint: string): Promise<T> {
-    return this.request<T>('GET', endpoint);
+  async get<T>(endpoint: string, apiVersion: 'v1' | 'v2' = 'v1'): Promise<T> {
+    return this.request<T>('GET', endpoint, undefined, apiVersion);
   }
 
   /**
    * POST 请求
    */
-  async post<T>(endpoint: string, data: unknown): Promise<T> {
-    return this.request<T>('POST', endpoint, data);
+  async post<T>(endpoint: string, data: unknown, apiVersion: 'v1' | 'v2' = 'v1'): Promise<T> {
+    return this.request<T>('POST', endpoint, data, apiVersion);
+  }
+
+  /**
+   * PUT 请求
+   */
+  async put<T>(endpoint: string, data: unknown, apiVersion: 'v1' | 'v2' = 'v1'): Promise<T> {
+    return this.request<T>('PUT', endpoint, data, apiVersion);
+  }
+
+  /**
+   * DELETE 请求
+   */
+  async delete<T>(endpoint: string, apiVersion: 'v1' | 'v2' = 'v1'): Promise<T> {
+    return this.request<T>('DELETE', endpoint, undefined, apiVersion);
   }
 
   /**
