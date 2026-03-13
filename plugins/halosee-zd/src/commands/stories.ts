@@ -19,28 +19,23 @@ import type {
 
 /**
  * 创建需求
+ *
+ * 禅道有两种需求：
+ * - 用户需求（产品级别）：POST /products/{id}/stories
+ * - 研发需求（项目级别）：POST /projects/{id}/stories
+ *
+ * 任务关联的是研发需求，默认创建研发需求
  */
 export async function createStory(args: CreateStoryArgs): Promise<void> {
   const client = getClient();
+  const config = loadProjectConfig();
 
-  // 检查产品 ID
-  let product = args.product;
-
-  if (!product) {
-    const config = loadProjectConfig();
-    if (config?.productId) {
-      product = config.productId;
-      console.log(`使用配置中的产品 ID: ${product}`);
-    } else {
-      printError('需要指定产品 ID。请使用 --product 参数或在项目配置中设置 productId');
-      return;
-    }
-  }
+  // 判断需求类型：默认创建研发需求（项目级别）
+  const isProjectStory = args.type !== 'user';
 
   // 构建请求数据
   const data: Record<string, unknown> = {
     title: args.title,
-    product: product,
     pri: args.pri ?? 3,
     estimate: args.estimate ?? 0,
     category: args.category || 'feature', // 默认类别为 feature
@@ -59,24 +54,61 @@ export async function createStory(args: CreateStoryArgs): Promise<void> {
   if (args.linkRequirements) data.linkRequirements = args.linkRequirements;
   if (args.twins) data.twins = args.twins;
 
-  console.log('创建需求...');
-
   try {
-    const result = await client.post<ApiResponse<{ id: number }>>(
-      `/products/${product}/stories`,
-      data
-    );
+    let result: ApiResponse<{ id: number }>;
+    let storyId: number | undefined;
 
-    const storyId = result.id || result.data?.id;
+    if (isProjectStory) {
+      // 创建研发需求（项目级别）
+      let project = args.project || config?.projectId;
+
+      if (!project) {
+        printError('需要指定项目 ID。请使用 --project 参数或在项目配置中设置 projectId');
+        return;
+      }
+
+      // 研发需求需要关联产品
+      if (config?.productId) {
+        data.product = config.productId;
+      }
+
+      console.log(`创建研发需求 (项目 #${project})...`);
+      result = await client.post<ApiResponse<{ id: number }>>(
+        `/projects/${project}/stories`,
+        data
+      );
+      storyId = result.id || result.data?.id;
+
+      if (storyId) {
+        printSuccess(`研发需求 #${storyId} 已创建: ${args.title}`);
+        console.log(`\n可以使用以下命令创建关联任务:`);
+        console.log(`  npx tsx src/index.ts create --name "任务名称" --story ${storyId}`);
+      }
+    } else {
+      // 创建用户需求（产品级别）
+      let product = args.product || config?.productId;
+
+      if (!product) {
+        printError('需要指定产品 ID。请使用 --product 参数');
+        return;
+      }
+
+      console.log(`创建用户需求 (产品 #${product})...`);
+      result = await client.post<ApiResponse<{ id: number }>>(
+        `/products/${product}/stories`,
+        data
+      );
+      storyId = result.id || result.data?.id;
+
+      if (storyId) {
+        printSuccess(`用户需求 #${storyId} 已创建: ${args.title}`);
+      }
+    }
+
     if (!storyId) {
       printError('创建需求失败: 未返回需求 ID');
       console.log(JSON.stringify(result, null, 2));
-      return;
     }
-
-    printSuccess(`需求 #${storyId} 已创建: ${args.title}`);
-    console.log(`\n可以使用以下命令创建关联任务:`);
-    console.log(`  npx tsx src/index.ts create --name "任务名称" --story ${storyId}`);
   } catch (e) {
     printError(`创建需求失败: ${e}`);
   }

@@ -16,8 +16,9 @@ export interface GlobalConfig {
 // 项目级配置
 export interface ProjectConfig {
   projectId: number;
-  productId?: number;
-  productName: string;
+  projectName: string;
+  productId?: number;               // 关联的产品 ID(用于创建需求)
+  productDisplayName?: string;      // 产品显示名称
   executions: Execution[];
   defaultExecution: number;
   taskTypes: Record<string, TaskTypeConfig>;
@@ -235,7 +236,10 @@ export interface StoriesResponse {
 
 export interface CreateStoryArgs {
   title: string;
-  product?: number;
+  type?: 'project' | 'user';  // 需求类型：project=研发需求, user=用户需求
+  project?: number;           // 项目 ID（研发需求）
+  product?: number;           // 产品 ID（用户需求）
+  category?: string;          // 需求类别
   module?: number;
   plan?: number;
   source?: string;

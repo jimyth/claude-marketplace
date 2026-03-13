@@ -65,7 +65,10 @@ function printHelp(): void {
   story               需求管理
     create              创建需求
       --title <title>     需求标题 (必填)
-      --product <id>      产品 ID (必填或从配置获取)
+      --type <type>       需求类型: project(研发需求)/user(用户需求) (默认 project)
+      --project <id>      项目 ID (研发需求，可选)
+      --product <id>      产品 ID (用户需求，可选)
+      --category <cat>    需求类别 (默认 feature)
       --pri <n>           优先级 (1-4, 默认 3)
       --estimate <h>      预计工时
       --assignedTo <user> 指派给
@@ -251,7 +254,10 @@ async function main(): Promise<void> {
             }
             await createStory({
               title: options.title as string,
+              type: options.type as 'project' | 'user',
+              project: options.project ? parseInt(options.project as string, 10) : undefined,
               product: options.product ? parseInt(options.product as string, 10) : undefined,
+              category: options.category as string,
               module: options.module ? parseInt(options.module as string, 10) : undefined,
               plan: options.plan ? parseInt(options.plan as string, 10) : undefined,
               pri: options.pri ? parseInt(options.pri as string, 10) : undefined,
