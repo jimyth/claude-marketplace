@@ -28,6 +28,16 @@
         "name": "Jimyth"
       },
       "keywords": ["zentao", "禅道", "task", "工时", "项目管理"]
+    },
+    {
+      "name": "aperant",
+      "source": "./plugins/aperant",
+      "description": "Aperant 任务管理插件 - 在 Claude Code 中管理 Aperant 项目任务",
+      "version": "1.0.0",
+      "author": {
+        "name": "Jimyth"
+      },
+      "keywords": ["aperant", "task", "kanban", "workflow", "openspec"]
     }
   ]
 }

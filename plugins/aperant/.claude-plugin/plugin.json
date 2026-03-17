@@ -1,0 +1,10 @@
+{
+  "name": "aperant",
+  "version": "1.0.0",
+  "description": "Aperant 任务管理插件 - 在 Claude Code 中管理 Aperant 项目任务",
+  "author": {
+    "name": "Jimyth"
+  },
+  "keywords": ["aperant", "task", "kanban", "workflow"],
+  "category": "development"
+}
