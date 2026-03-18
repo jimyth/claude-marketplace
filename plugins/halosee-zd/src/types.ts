@@ -19,6 +19,8 @@ export interface ProjectConfig {
   projectName: string;
   productId?: number;               // 关联的产品 ID(用于创建需求)
   productDisplayName?: string;      // 产品显示名称
+  parentTask?: number;              // 父任务 ID（创建子任务时使用）
+  defaultModule?: number;           // 默认模块 ID
   executions: Execution[];
   defaultExecution: number;
   taskTypes: Record<string, TaskTypeConfig>;
@@ -145,6 +147,8 @@ export interface CreateTaskArgs {
   story?: number;
   deadline?: string;
   noStart?: boolean;
+  module?: number;      // 模块 ID
+  parent?: number;      // 父任务 ID
 }
 
 export interface ListTasksArgs {

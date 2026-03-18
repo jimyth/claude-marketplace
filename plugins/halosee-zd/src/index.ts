@@ -46,6 +46,8 @@ function printHelp(): void {
     --desc <text>        任务描述 (或使用 stdin)
     --assignedTo <user>  指派给
     --deadline <date>    截止日期
+    --module <id>        模块 ID (可选，从配置或现有任务获取)
+    --parent <id>        父任务 ID (可选，创建子任务时使用)
     --no-start           不自动启动
 
   list                列出任务
@@ -199,6 +201,8 @@ async function main(): Promise<void> {
           desc: options.desc as string,
           assignedTo: options.assignedTo as string,
           deadline: options.deadline as string,
+          module: options.module ? parseInt(options.module as string, 10) : undefined,
+          parent: options.parent ? parseInt(options.parent as string, 10) : undefined,
           noStart: !!options['no-start'] || !!options.noStart,
         });
         break;

@@ -71,7 +71,7 @@ export async function createTask(args: CreateTaskArgs): Promise<void> {
   const today = new Date().toISOString().split('T')[0];
   const deadline = args.deadline || new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
 
-  const taskData = {
+  const taskData: Record<string, any> = {
     name: args.name,
     type: type,
     pri: pri,
@@ -81,10 +81,21 @@ export async function createTask(args: CreateTaskArgs): Promise<void> {
     deadline: deadline,
     desc: args.desc || '',
     assignedTo: assignedTo,
-    story: args.story || null,
   };
 
-  // 移除 null 值
+  // 添加 module 参数（从配置或参数获取）
+  const module = args.module ?? config?.defaultModule;
+  if (module !== undefined) {
+    taskData.module = module;
+  }
+
+  // 添加 parent 参数（从配置或参数获取）
+  const parent = args.parent ?? config?.parentTask;
+  if (parent !== undefined) {
+    taskData.parent = parent;
+  }
+
+  // 移除 undefined 值
   const cleanData = Object.fromEntries(
     Object.entries(taskData).filter(([_, v]) => v !== null && v !== undefined)
   );
@@ -92,18 +103,33 @@ export async function createTask(args: CreateTaskArgs): Promise<void> {
   console.log('创建任务...');
 
   try {
-    const result = await client.post<ApiResponse<{ id: number }>>(
+    const result = await client.post<any>(
       `/executions/${execution}/tasks`,
       cleanData
     );
 
-    const taskId = result.id || result.data?.id;
+    // 禅道 API 直接返回任务对象，ID 在 result.id 中
+    const taskId = result.id;
     if (!taskId) {
       printError('创建任务失败: 未返回任务 ID');
+      if (result.result === 'fail' && result.message) {
+        console.log('API 错误详情:', JSON.stringify(result.message, null, 2));
+      }
       return;
     }
 
     printSuccess(`任务 #${taskId} 已创建: ${args.name} (指派给: ${assignedTo})`);
+
+    // 设置父任务（通过更新 API）
+    if (parent !== undefined) {
+      console.log(`设置父任务 #${parent}...`);
+      try {
+        await client.put(`/tasks/${taskId}`, { parent: parent });
+        printSuccess(`任务已关联到父任务 #${parent}`);
+      } catch (e) {
+        console.log(`警告: 设置父任务失败: ${e}`);
+      }
+    }
 
     // 自动启动任务
     if (!args.noStart) {
