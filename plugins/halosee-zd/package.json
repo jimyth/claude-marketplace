@@ -1,6 +1,6 @@
 {
   "name": "halosee-zd",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "description": "禅道任务管理 CLI 工具",
   "type": "module",
   "main": "dist/index.js",
