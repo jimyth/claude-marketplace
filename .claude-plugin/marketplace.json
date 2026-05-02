@@ -38,6 +38,16 @@
         "name": "Jimyth"
       },
       "keywords": ["aperant", "task", "kanban", "workflow", "openspec"]
+    },
+    {
+      "name": "memoria-integration",
+      "source": "./plugins/memoria-integration",
+      "description": "自主记忆系统 — 跨会话、跨项目的持久化 LLM 记忆，完全自主演化，可追溯变更历史",
+      "version": "1.0.0",
+      "author": {
+        "name": "Jimyth"
+      },
+      "keywords": ["memory", "persistence", "mcp", "autonomous"]
     }
   ]
 }
